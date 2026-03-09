@@ -48,13 +48,32 @@ def _groq_chat(messages_list, max_tokens=1024):
 
 
 def _image_to_base64(image_path):
-    """Read image file and return base64 data URL."""
-    mime, _ = mimetypes.guess_type(image_path)
-    if not mime:
-        mime = 'image/jpeg'
-    with open(image_path, 'rb') as f:
-        data = base64.b64encode(f.read()).decode('utf-8')
-    return f"data:{mime};base64,{data}"
+    """Read image file, resize if needed, and return base64 data URL."""
+    from PIL import Image
+    import io
+
+    try:
+        img = Image.open(image_path)
+        # Convert to RGB if necessary (handles RGBA, P, WebP, etc.)
+        if img.mode not in ('RGB', 'L'):
+            img = img.convert('RGB')
+        # Resize if too large (max 1024px on longest side)
+        max_size = 1024
+        if max(img.size) > max_size:
+            img.thumbnail((max_size, max_size), Image.LANCZOS)
+        # Save to buffer as JPEG
+        buffer = io.BytesIO()
+        img.save(buffer, format='JPEG', quality=85)
+        data = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        return f"data:image/jpeg;base64,{data}"
+    except Exception:
+        # Fallback: read raw file
+        mime, _ = mimetypes.guess_type(image_path)
+        if not mime:
+            mime = 'image/jpeg'
+        with open(image_path, 'rb') as f:
+            data = base64.b64encode(f.read()).decode('utf-8')
+        return f"data:{mime};base64,{data}"
 
 
 def _groq_vision(prompt_text, image_path):
