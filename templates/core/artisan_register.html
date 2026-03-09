@@ -1,0 +1,387 @@
+{% extends 'base.html' %}
+
+{% block title %}Register as Artisan{% endblock %}
+
+{% block extra_css %}
+<style>
+.ks-register-page { padding: 2rem 0 3rem; }
+.ks-register-hero {
+    text-align: center; margin-bottom: 2.5rem;
+}
+.ks-register-hero .ks-hero-icon {
+    width: 72px; height: 72px; border-radius: 20px;
+    background: linear-gradient(135deg, var(--ks-primary), var(--ks-accent));
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1.8rem; margin-bottom: 1rem;
+    box-shadow: 0 8px 24px rgba(230,81,0,.25);
+}
+.ks-register-hero h2 { font-family: var(--ks-serif); font-size: 2rem; margin-bottom: .3rem; }
+.ks-register-hero p { color: var(--ks-muted); max-width: 500px; margin: 0 auto; }
+
+.ks-register-card {
+    max-width: 680px; margin: 0 auto;
+    background: var(--ks-card-bg);
+    border: 1px solid var(--ks-border);
+    border-radius: var(--ks-radius);
+    box-shadow: var(--ks-shadow-lg);
+    overflow: hidden;
+}
+.ks-form-section {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--ks-border);
+}
+.ks-form-section:last-of-type { border-bottom: none; }
+.ks-form-section-header {
+    display: flex; align-items: center; gap: .75rem;
+    margin-bottom: 1.2rem;
+}
+.ks-form-section-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+}
+.ks-form-section-icon.identity { background: #fff3e0; color: #e65100; }
+.ks-form-section-icon.account { background: #e8eaf6; color: #283593; }
+.ks-form-section-icon.location { background: #e8f5e9; color: #2e7d32; }
+.ks-form-section-icon.craft { background: #fce4ec; color: #c62828; }
+.ks-form-section-icon.story { background: #e3f2fd; color: #1565c0; }
+.ks-form-section-icon.contact { background: #f3e5f5; color: #7b1fa2; }
+.ks-form-section-header h6 {
+    font-family: var(--ks-font); font-weight: 700;
+    font-size: .95rem; margin: 0; color: var(--ks-dark);
+}
+.ks-form-section-header small { color: var(--ks-muted); font-size: .8rem; }
+.ks-register-card .form-label {
+    font-weight: 600; font-size: .85rem; margin-bottom: .3rem; color: var(--ks-dark);
+}
+.ks-register-card .form-control, .ks-register-card .form-select {
+    border-radius: var(--ks-radius-sm); padding: .7rem 1rem;
+    border: 1.5px solid var(--ks-border); font-size: .95rem;
+    transition: all var(--ks-transition);
+}
+.ks-register-card .form-control:focus, .ks-register-card .form-select:focus {
+    border-color: var(--ks-primary); box-shadow: 0 0 0 3px rgba(230,81,0,.1);
+}
+.ks-register-card textarea.form-control { min-height: 100px; }
+
+/* Photo preview */
+.ks-photo-upload {
+    display: flex; align-items: center; gap: 1rem;
+}
+.ks-photo-preview {
+    width: 72px; height: 72px; border-radius: 50%;
+    border: 2px dashed var(--ks-border); background: var(--ks-light);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex-shrink: 0;
+    transition: all var(--ks-transition);
+}
+.ks-photo-preview img {
+    width: 100%; height: 100%; object-fit: cover;
+}
+.ks-photo-preview.has-photo { border: 2px solid var(--ks-primary); }
+.ks-photo-preview i { font-size: 1.5rem; color: var(--ks-muted); }
+
+/* Voice button enhanced */
+.ks-voice-record {
+    display: flex; align-items: center; gap: .75rem;
+    padding: .75rem 1rem; border-radius: var(--ks-radius-sm);
+    background: var(--ks-light); border: 1px solid var(--ks-border);
+    margin-bottom: .75rem; transition: all var(--ks-transition);
+}
+.ks-voice-record.active { background: #fff3e0; border-color: var(--ks-accent); }
+.ks-voice-record .ks-voice-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--ks-muted); display: none;
+}
+.ks-voice-record.active .ks-voice-dot {
+    display: block; background: #f44336;
+    animation: ks-pulse 1s infinite;
+}
+@keyframes ks-pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+/* Submit area */
+.ks-register-submit {
+    padding: 1.5rem 2rem; background: var(--ks-light);
+    border-top: 1px solid var(--ks-border);
+}
+
+/* Login link */
+.ks-register-login-link {
+    text-align: center; margin-top: 1.5rem;
+    font-size: .9rem; color: var(--ks-muted);
+}
+.ks-register-login-link a { font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="ks-register-page">
+    <div class="container">
+        <div class="ks-register-hero">
+            <div class="ks-hero-icon"><i class="bi bi-palette2"></i></div>
+            <h2>Join KalaSetu</h2>
+            <p>Create your artisan profile — AI will craft a professional bio and help you reach buyers worldwide.</p>
+        </div>
+
+        <div class="ks-register-card">
+            <form method="post" enctype="multipart/form-data" id="artisan-form">
+                {% csrf_token %}
+
+                <!-- Section 1: Identity -->
+                <div class="ks-form-section">
+                    <div class="ks-form-section-header">
+                        <div class="ks-form-section-icon identity"><i class="bi bi-person"></i></div>
+                        <div>
+                            <h6>Your Identity</h6>
+                            <small>Tell us who you are</small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-7 mb-3">
+                            <label class="form-label">Full Name *</label>
+                            {{ form.name }}
+                        </div>
+                        <div class="col-md-5 mb-3">
+                            <label class="form-label">Your Photo</label>
+                            <div class="ks-photo-upload">
+                                <div class="ks-photo-preview" id="photo-preview">
+                                    <i class="bi bi-camera"></i>
+                                </div>
+                                <div style="flex:1;">{{ form.photo }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Account & Security -->
+                <div class="ks-form-section">
+                    <div class="ks-form-section-header">
+                        <div class="ks-form-section-icon account"><i class="bi bi-shield-lock"></i></div>
+                        <div>
+                            <h6>Account & Security</h6>
+                            <small>Your email and password for secure login</small>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><i class="bi bi-envelope me-1"></i> Email Address *</label>
+                        {{ form.email }}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-lock me-1"></i> Password *</label>
+                            {{ form.password }}
+                            <small class="text-muted">Minimum 6 characters</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-lock-fill me-1"></i> Confirm Password *</label>
+                            {{ form.confirm_password }}
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label"><i class="bi bi-phone me-1"></i> Phone Number</label>
+                        {{ form.phone }}
+                        <small class="text-muted">Optional — can also be used for login</small>
+                    </div>
+                </div>
+
+                <!-- Section 2: Location -->
+                <div class="ks-form-section">
+                    <div class="ks-form-section-header">
+                        <div class="ks-form-section-icon location"><i class="bi bi-geo-alt"></i></div>
+                        <div>
+                            <h6>Where You're From</h6>
+                            <small>Your location helps buyers discover local crafts</small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Village / City</label>
+                            {{ form.location }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">State</label>
+                            {{ form.state }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Craft -->
+                <div class="ks-form-section">
+                    <div class="ks-form-section-header">
+                        <div class="ks-form-section-icon craft"><i class="bi bi-brush"></i></div>
+                        <div>
+                            <h6>Your Craft</h6>
+                            <small>What art form do you practice?</small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Craft Type *</label>
+                            {{ form.craft_type }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Primary Language</label>
+                            {{ form.language }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Story (with voice) -->
+                <div class="ks-form-section">
+                    <div class="ks-form-section-header">
+                        <div class="ks-form-section-icon story"><i class="bi bi-book"></i></div>
+                        <div>
+                            <h6>Your Story</h6>
+                            <small>Share your craft journey — type or speak in your language</small>
+                        </div>
+                    </div>
+                    <div class="ks-voice-record" id="voice-record-bar">
+                        <span class="ks-voice-dot"></span>
+                        <button type="button" class="ks-voice-btn" id="voice-btn" style="margin:0;">
+                            <i class="bi bi-mic"></i> Speak Your Story
+                        </button>
+                        <small class="text-muted" id="voice-status">Click to speak in your language</small>
+                    </div>
+                    {{ form.story }}
+                </div>
+
+                {% if form.errors %}
+                <div class="px-4 pb-2">
+                    <div class="alert alert-danger rounded-3 mb-0" style="font-size:.9rem;">
+                        {% for field, errors in form.errors.items %}
+                            <strong>{{ field }}:</strong> {{ errors|join:", " }}<br>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Submit -->
+                <div class="ks-register-submit">
+                    <button type="submit" class="btn ks-btn-primary btn-lg w-100">
+                        <i class="bi bi-sparkle me-1"></i> Create My Profile with AI
+                    </button>
+                    <p class="text-center mt-2 mb-0" style="font-size:.82rem;color:var(--ks-muted);">
+                        AI will generate your professional bio automatically
+                    </p>
+                </div>
+            </form>
+        </div>
+
+        <div class="ks-register-login-link">
+            Already registered? <a href="{% url 'artisan_login' %}">Login here</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Photo preview
+const photoInput = document.querySelector('input[name="photo"]');
+const photoPreview = document.getElementById('photo-preview');
+if (photoInput) {
+    photoInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                photoPreview.innerHTML = '<img src="' + ev.target.result + '" alt="Preview">';
+                photoPreview.classList.add('has-photo');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+// Web Speech API for voice input
+const voiceBtn = document.getElementById('voice-btn');
+const storyField = document.querySelector('textarea[name="story"]');
+const voiceBar = document.getElementById('voice-record-bar');
+const voiceStatus = document.getElementById('voice-status');
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'hi-IN';
+
+    let isRecording = false;
+    let textBeforeRecording = '';
+    let finalTranscript = '';
+
+    voiceBtn.addEventListener('click', () => {
+        if (isRecording) {
+            recognition.stop();
+            voiceBtn.innerHTML = '<i class="bi bi-mic"></i> Speak Your Story';
+            voiceBtn.classList.remove('recording');
+            voiceBar.classList.remove('active');
+            voiceStatus.textContent = 'Click to speak in your language';
+            isRecording = false;
+        } else {
+            const langMap = {
+                'Hindi': 'hi-IN', 'Tamil': 'ta-IN', 'Bengali': 'bn-IN',
+                'Telugu': 'te-IN', 'Marathi': 'mr-IN', 'Gujarati': 'gu-IN',
+                'Kannada': 'kn-IN', 'Malayalam': 'ml-IN', 'Odia': 'or-IN',
+                'Punjabi': 'pa-IN', 'English': 'en-IN',
+            };
+            const selectedLang = document.querySelector('select[name="language"]').value;
+            recognition.lang = langMap[selectedLang] || 'hi-IN';
+
+            textBeforeRecording = storyField.value;
+            finalTranscript = '';
+
+            try {
+                recognition.start();
+                voiceBtn.innerHTML = '<i class="bi bi-stop-circle"></i> Stop Recording';
+                voiceBtn.classList.add('recording');
+                voiceBar.classList.add('active');
+                voiceStatus.textContent = 'Listening... speak now';
+                isRecording = true;
+            } catch (e) {
+                console.error('Speech recognition start failed:', e);
+            }
+        }
+    });
+
+    recognition.onresult = (event) => {
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                finalTranscript += transcript + ' ';
+            } else {
+                interimTranscript += transcript;
+            }
+        }
+        const sep = textBeforeRecording ? (textBeforeRecording.endsWith(' ') ? '' : ' ') : '';
+        storyField.value = textBeforeRecording + sep + finalTranscript + interimTranscript;
+    };
+
+    recognition.onend = () => {
+        if (isRecording) {
+            // Unexpected stop — restart to keep recording
+            try { recognition.start(); } catch(e) {
+                voiceBtn.innerHTML = '<i class="bi bi-mic"></i> Speak Your Story';
+                voiceBtn.classList.remove('recording');
+                voiceBar.classList.remove('active');
+                voiceStatus.textContent = 'Click to speak in your language';
+                isRecording = false;
+            }
+        }
+    };
+
+    recognition.onerror = (event) => {
+        if (event.error !== 'no-speech') {
+            voiceBtn.innerHTML = '<i class="bi bi-mic"></i> Speak Your Story';
+            voiceBtn.classList.remove('recording');
+            voiceBar.classList.remove('active');
+            voiceStatus.textContent = 'Click to speak in your language';
+            isRecording = false;
+        }
+    };
+} else {
+    voiceBtn.style.display = 'none';
+}
+</script>
+{% endblock %}

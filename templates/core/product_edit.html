@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit — {{ product.title }}{% endblock %}
+
+{% block content %}
+<section class="ks-section">
+    <div class="container">
+        <div class="row g-5">
+            <!-- Product Image -->
+            <div class="col-md-5 mb-4">
+                <div class="ks-detail-img">
+                    <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                </div>
+                {% if product.suggested_price and not product.price %}
+                <div class="ks-ai-alert mt-3">
+                    <i class="bi bi-lightbulb"></i>
+                    <span><strong>AI Suggested Price:</strong> ₹{{ product.suggested_price }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Edit Form -->
+            <div class="col-md-7">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3>Review & Edit Listing</h3>
+                    <span class="ks-badge ks-badge-ai"><i class="bi bi-stars me-1"></i>AI Generated</span>
+                </div>
+                <p class="text-muted mb-4" style="font-size:.92rem;">AI analyzed your craft and generated this listing. Review and edit before publishing.</p>
+
+                <form method="post" class="ks-form">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        {{ form.title }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        {{ form.description }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Cultural Story</label>
+                        {{ form.cultural_story }}
+                        <small class="text-muted">The heritage and history behind this art form</small>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Category</label>
+                            {{ form.category }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Art Form</label>
+                            {{ form.art_form }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Materials</label>
+                            {{ form.materials }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Techniques</label>
+                            {{ form.techniques }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Price (₹)</label>
+                        {{ form.price }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">SEO Tags</label>
+                        {{ form.tags }}
+                        <small class="text-muted">Comma-separated tags for search optimization</small>
+                    </div>
+
+                    <div class="mb-4 form-check form-switch">
+                        {{ form.is_published }}
+                        <label class="form-check-label ms-2" for="id_is_published" style="font-weight:600;">Publish to Storefront</label>
+                    </div>
+
+                    {% if form.errors %}
+                    <div class="alert alert-danger rounded-3">
+                        {% for field, errors in form.errors.items %}
+                            <strong>{{ field }}:</strong> {{ errors|join:", " }}<br>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button type="submit" class="btn ks-btn-primary btn-lg flex-fill">
+                            <i class="bi bi-check-circle me-1"></i> Save Listing
+                        </button>
+                        <a href="{% url 'marketing_hub' product.id %}" class="btn ks-btn-outline btn-lg">
+                            <i class="bi bi-megaphone me-1"></i> Generate Marketing
+                        </a>
+                    </div>
+
+                    {% if product.is_published %}
+                    <div class="alert alert-success mt-3 d-flex align-items-center justify-content-between" style="border-radius:12px;">
+                        <span><i class="bi bi-check-circle-fill me-2"></i> This product is <strong>live on the storefront</strong></span>
+                        <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-success" style="border-radius:8px;">
+                            <i class="bi bi-eye me-1"></i> View on Storefront
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning mt-3 d-flex align-items-center justify-content-between" style="border-radius:12px;">
+                        <span><i class="bi bi-exclamation-circle me-2"></i> This product is a <strong>draft</strong> — toggle "Publish" above and save to make it live</span>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block title %}Marketing Hub — {{ product.title }}{% endblock %}
+
+{% block content %}
+<section class="ks-section">
+    <div class="container">
+        <div class="row g-5">
+            <!-- Product Sidebar -->
+            <div class="col-md-4 mb-4">
+                <div class="ks-card ks-marketing-sidebar">
+                    <div style="overflow:hidden;border-radius:var(--ks-radius) var(--ks-radius) 0 0;">
+                        <img src="{{ product.image.url }}" alt="{{ product.title }}" style="width:100%;height:240px;object-fit:cover;">
+                    </div>
+                    <div style="padding:1.2rem 1.5rem;">
+                        <h5 style="margin-bottom:.3rem;">{{ product.title }}</h5>
+                        <span class="ks-badge ks-badge-category">{{ product.art_form }}</span>
+                        {% if product.price %}
+                        <p style="font-weight:700;color:var(--ks-primary);margin-top:.6rem;">₹{{ product.price }}</p>
+                        {% endif %}
+                        <p class="text-muted" style="font-size:.85rem;line-height:1.6;">{{ product.description|truncatewords:30 }}</p>
+                        <a href="{% url 'product_edit' product.id %}" class="btn ks-btn-outline btn-sm w-100">
+                            <i class="bi bi-pencil me-1"></i> Edit Listing
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marketing Content -->
+            <div class="col-md-8">
+                <div class="mb-4">
+                    <span class="ks-label">AI Marketing</span>
+                    <h3>Content Generator</h3>
+                    {% if product.is_published %}
+                    <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-success mt-2" style="border-radius:8px;">
+                        <i class="bi bi-eye me-1"></i> View Product on Storefront
+                    </a>
+                    {% else %}
+                    <button class="btn btn-sm btn-warning mt-2" id="publish-from-hub" style="border-radius:8px;">
+                        <i class="bi bi-send me-1"></i> Publish Product First
+                    </button>
+                    {% endif %}
+                </div>
+
+                <!-- Generator Buttons -->
+                <div class="ks-card mb-4">
+                    <div class="ks-card-body">
+                        <h6 style="font-weight:700;margin-bottom:1rem;">Generate Marketing Content</h6>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <button class="ks-gen-btn generate-btn" data-type="instagram">
+                                <i class="bi bi-instagram"></i> Instagram
+                            </button>
+                            <button class="ks-gen-btn generate-btn" data-type="facebook">
+                                <i class="bi bi-facebook"></i> Facebook
+                            </button>
+                            <button class="ks-gen-btn generate-btn" data-type="campaign">
+                                <i class="bi bi-rocket-takeoff"></i> Campaign
+                            </button>
+                            <button class="ks-gen-btn generate-btn" data-type="hashtags">
+                                <i class="bi bi-hash"></i> Hashtags
+                            </button>
+                            <button class="ks-gen-btn" id="trends-btn">
+                                <i class="bi bi-graph-up"></i> Trends
+                            </button>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="form-label mb-0 small fw-bold"><i class="bi bi-translate me-1"></i>Language:</label>
+                            <select id="langSelect" class="form-select form-select-sm" style="max-width:160px;">
+                                <option value="English">English</option>
+                                <option value="Hindi">Hindi</option>
+                                <option value="Tamil">Tamil</option>
+                                <option value="Telugu">Telugu</option>
+                                <option value="Bengali">Bengali</option>
+                                <option value="Marathi">Marathi</option>
+                                <option value="Kannada">Kannada</option>
+                                <option value="Gujarati">Gujarati</option>
+                                <option value="Malayalam">Malayalam</option>
+                                <option value="Punjabi">Punjabi</option>
+                                <option value="Odia">Odia</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading -->
+                <div id="loading" style="display:none;" class="ks-loading">
+                    <div class="spinner-border" role="status"></div>
+                    <p>AI is generating content...</p>
+                </div>
+
+                <!-- Generated Content -->
+                <div id="generated-content" style="display:none;" class="mb-4">
+                    <div class="ks-output-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 style="font-weight:700;margin:0;" id="content-type-label">Generated Content</h6>
+                            <div class="d-flex gap-2">
+                                <button class="ks-gen-btn" onclick="copyContent()" style="font-size:.78rem;padding:.35rem .75rem;">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
+                                <button class="ks-gen-btn" onclick="shareWhatsApp()" style="font-size:.78rem;padding:.35rem .75rem;background:#25d366;color:#fff;border-color:#25d366;">
+                                    <i class="bi bi-whatsapp"></i> Share
+                                </button>
+                            </div>
+                        </div>
+                        <div id="content-output" class="content-output"></div>
+                    </div>
+                </div>
+
+                <!-- Trend Analysis -->
+                <div id="trends-content" style="display:none;" class="mb-4">
+                    <div class="ks-output-card trend">
+                        <h6 style="font-weight:700;margin-bottom:.8rem;"><i class="bi bi-graph-up me-1"></i> Market Trend Analysis</h6>
+                        <div id="trends-output" class="content-output"></div>
+                    </div>
+                </div>
+
+                <!-- Previous Content -->
+                {% if existing_content %}
+                <h5 class="mt-4 mb-3">Previously Generated</h5>
+                {% for mc in existing_content %}
+                <div class="ks-prev-card">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="ks-badge ks-badge-category">{{ mc.get_content_type_display }}</span>
+                        <small class="text-muted">{{ mc.created_at|timesince }} ago</small>
+                    </div>
+                    <p style="white-space:pre-wrap;font-size:.9rem;margin:0;color:var(--ks-text);line-height:1.6;">{{ mc.content|truncatewords:50 }}</p>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const productId = '{{ product.id }}';
+const csrfToken = '{{ csrf_token }}';
+
+document.querySelectorAll('.generate-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const contentType = this.dataset.type;
+        const loading = document.getElementById('loading');
+        const output = document.getElementById('generated-content');
+
+        loading.style.display = 'flex';
+        output.style.display = 'none';
+
+        try {
+            const formData = new FormData();
+            formData.append('content_type', contentType);
+            formData.append('language', document.getElementById('langSelect').value);
+
+            const response = await fetch(`/product/${productId}/marketing/generate/`, {
+                method: 'POST',
+                headers: {'X-CSRFToken': csrfToken},
+                body: formData,
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('content-output').textContent = data.content;
+                const typeLabels = {
+                    'instagram': 'Instagram Post',
+                    'facebook': 'Facebook Post',
+                    'campaign': 'Campaign Idea',
+                    'hashtags': 'Hashtags',
+                };
+                document.getElementById('content-type-label').textContent = typeLabels[contentType] || 'Generated Content';
+                output.style.display = 'block';
+            } else {
+                alert('Error: ' + (data.error || 'Something went wrong'));
+            }
+        } catch (err) {
+            alert('Network error. Please try again.');
+        } finally {
+            loading.style.display = 'none';
+        }
+    });
+});
+
+document.getElementById('trends-btn').addEventListener('click', async function() {
+    const loading = document.getElementById('loading');
+    const output = document.getElementById('trends-content');
+
+    loading.style.display = 'flex';
+    output.style.display = 'none';
+
+    try {
+        const formData = new FormData();
+        const response = await fetch(`/product/${productId}/marketing/trends/`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrfToken},
+            body: formData,
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            document.getElementById('trends-output').textContent = data.content;
+            output.style.display = 'block';
+        } else {
+            alert('Error: ' + (data.error || 'Something went wrong'));
+        }
+    } catch (err) {
+        alert('Network error. Please try again.');
+    } finally {
+        loading.style.display = 'none';
+    }
+});
+
+function copyContent() {
+    const text = document.getElementById('content-output').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+    });
+}
+
+function shareWhatsApp() {
+    const text = document.getElementById('content-output').textContent;
+    const productUrl = window.location.origin + '/product/' + productId + '/';
+    const msg = text + '\n\n' + productUrl;
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// Publish from marketing hub
+const pubBtn = document.getElementById('publish-from-hub');
+if (pubBtn) {
+    pubBtn.addEventListener('click', async function() {
+        pubBtn.disabled = true;
+        pubBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Publishing...';
+        try {
+            const resp = await fetch(`/product/${productId}/publish/`, {
+                method: 'POST',
+                headers: {'X-CSRFToken': csrfToken},
+            });
+            const data = await resp.json();
+            if (data.success && data.is_published) {
+                const wrapper = pubBtn.parentElement;
+                wrapper.innerHTML = `<a href="${data.detail_url}" class="btn btn-sm btn-success mt-2" style="border-radius:8px;" target="_blank"><i class="bi bi-globe"></i> View Product on Storefront</a>`;
+            } else {
+                alert('Could not publish. Try again.');
+                pubBtn.disabled = false;
+                pubBtn.innerHTML = '<i class="bi bi-upload"></i> Publish Product First';
+            }
+        } catch(e) {
+            alert('Network error.');
+            pubBtn.disabled = false;
+            pubBtn.innerHTML = '<i class="bi bi-upload"></i> Publish Product First';
+        }
+    });
+}
+</script>
+{% endblock %}

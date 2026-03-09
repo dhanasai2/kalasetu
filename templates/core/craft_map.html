@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}India Craft Map{% endblock %}
+
+{% block extra_css %}
+<style>
+.ks-map-hero {
+    background: linear-gradient(135deg, var(--ks-saffron) 0%, var(--ks-copper) 100%);
+    color: #fff;
+    padding: 3rem 0;
+    text-align: center;
+}
+.ks-map-container { position: relative; max-width: 700px; margin: 0 auto; }
+.ks-map-svg { width: 100%; height: auto; }
+.ks-state-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid var(--ks-border);
+    padding: 1.25rem;
+    transition: transform .2s;
+}
+.ks-state-card:hover { transform: translateY(-3px); box-shadow: var(--ks-shadow-md); }
+.ks-gi-badge-sm {
+    display: inline-block;
+    background: linear-gradient(135deg, #f8e8d0, #f0d4a8);
+    color: #7a4b1e;
+    font-size: .72rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin: 2px;
+    font-weight: 500;
+}
+.state-filter-btn.active { background: var(--ks-saffron); color: #fff; border-color: var(--ks-saffron); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ks-map-hero">
+    <div class="container">
+        <h1 class="display-5 fw-bold mb-2"><i class="bi bi-map me-2"></i>India Craft Map</h1>
+        <p class="lead opacity-90">Explore India's incredible craft heritage, state by state</p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <!-- Search -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" id="stateSearch" class="form-control" placeholder="Search state or craft...">
+            </div>
+        </div>
+    </div>
+
+    <!-- State Grid -->
+    <div class="row g-3" id="stateGrid">
+        <!-- Filled by JS -->
+    </div>
+
+    <div id="emptyState" class="text-center py-5 d-none">
+        <i class="bi bi-search display-4 text-muted"></i>
+        <p class="text-muted mt-2">No matching states or crafts found</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const stateCrafts = JSON.parse('{{ state_crafts|escapejs }}');
+const stateProducts = JSON.parse('{{ state_products|escapejs }}');
+const giBySt = JSON.parse('{{ gi_by_state|escapejs }}');
+
+const INDIAN_STATES = [
+    'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat',
+    'Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh',
+    'Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab',
+    'Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh',
+    'Uttarakhand','West Bengal','Jammu and Kashmir','Ladakh','Delhi','Puducherry'
+];
+
+function buildGrid(filter) {
+    const grid = document.getElementById('stateGrid');
+    grid.innerHTML = '';
+    let count = 0;
+    const f = (filter || '').toLowerCase();
+
+    INDIAN_STATES.forEach(st => {
+        const crafts = stateCrafts[st] || [];
+        const gi = giBySt[st] || [];
+        const prods = stateProducts[st] || 0;
+        const matchText = st.toLowerCase() + ' ' + crafts.map(c=>c.craft).join(' ').toLowerCase() + ' ' + gi.join(' ').toLowerCase();
+
+        if (f && !matchText.includes(f)) return;
+        count++;
+
+        const craftHtml = crafts.length
+            ? crafts.slice(0,4).map(c => `<span class="badge bg-light text-dark me-1 mb-1">${c.craft} <small class="text-muted">(${c.count})</small></span>`).join('')
+            : '<span class="text-muted small">No artisans yet</span>';
+
+        const giHtml = gi.length
+            ? gi.map(g => `<span class="ks-gi-badge-sm"><i class="bi bi-patch-check-fill me-1"></i>${g}</span>`).join('')
+            : '';
+
+        grid.innerHTML += `
+        <div class="col-md-6 col-lg-4">
+            <div class="ks-state-card h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0">${st}</h5>
+                    <span class="badge bg-primary">${prods} products</span>
+                </div>
+                <div class="mb-2">${craftHtml}</div>
+                ${giHtml ? `<div class="mt-2"><small class="text-muted d-block mb-1">GI Tags:</small>${giHtml}</div>` : ''}
+                <a href="/shop/?state=${encodeURIComponent(st)}" class="btn btn-sm ks-btn-outline mt-2 w-100">
+                    <i class="bi bi-shop me-1"></i> View Products
+                </a>
+            </div>
+        </div>`;
+    });
+
+    document.getElementById('emptyState').classList.toggle('d-none', count > 0);
+}
+
+buildGrid('');
+document.getElementById('stateSearch').addEventListener('input', e => buildGrid(e.target.value));
+</script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{
+    "name": "KalaSetu — Bridge of Art",
+    "short_name": "KalaSetu",
+    "description": "AI-powered marketplace connecting India's artisans to the world",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#FFFDF8",
+    "theme_color": "#C45B28",
+    "icons": [
+        {
+            "src": "/static/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

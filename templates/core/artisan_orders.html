@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Orders — {{ artisan.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="ks-section-title mb-1"><i class="bi bi-bag-check me-2"></i>Orders & Inquiries</h2>
+            <p class="text-muted mb-0">{{ artisan.name }}</p>
+        </div>
+        <a href="{% url 'artisan_dashboard' artisan.id %}" class="btn ks-btn-outline btn-sm"><i class="bi bi-arrow-left me-1"></i> Dashboard</a>
+    </div>
+
+    {% if orders %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Product</th>
+                    <th>Buyer</th>
+                    <th>Message</th>
+                    <th>Qty</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Certificate</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>
+                        <a href="{% url 'product_detail' order.product.id %}" class="text-decoration-none">
+                            {{ order.product.title|truncatechars:35 }}
+                        </a>
+                    </td>
+                    <td>
+                        <strong>{{ order.buyer.name }}</strong><br>
+                        <small class="text-muted">{{ order.buyer.email }}</small>
+                        {% if order.buyer.phone %}<br><small class="text-muted">{{ order.buyer.phone }}</small>{% endif %}
+                    </td>
+                    <td><small>{{ order.message|truncatechars:60|default:"—" }}</small></td>
+                    <td>{{ order.quantity }}</td>
+                    <td>
+                        <span class="badge bg-{% if order.status == 'inquiry' %}info{% elif order.status == 'confirmed' %}warning{% elif order.status == 'shipped' %}primary{% else %}success{% endif %}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ order.created_at|date:"d M Y" }}</td>
+                    <td>
+                        <a href="{% url 'order_certificate' order.id %}" target="_blank" class="btn btn-sm ks-btn-outline" title="Download Certificate">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 bg-light rounded-3">
+        <i class="bi bi-inbox display-4 text-muted"></i>
+        <p class="text-muted mt-2">No orders yet. Share your products to start getting inquiries!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

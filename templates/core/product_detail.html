@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.title }}{% endblock %}
+
+{% block content %}
+<section class="ks-section">
+    <div class="container">
+        <div class="row g-5">
+            <!-- Product Image -->
+            <div class="col-md-6 mb-4">
+                <div class="ks-detail-img">
+                    <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                </div>
+                <!-- View count -->
+                <div class="text-center mt-2">
+                    <small class="text-muted"><i class="bi bi-eye me-1"></i>{{ product.view_count }} views</small>
+                </div>
+            </div>
+
+            <!-- Product Details -->
+            <div class="col-md-6">
+                <div class="ks-breadcrumb">
+                    <a href="{% url 'storefront' %}">Shop</a>
+                    <span>/</span>
+                    <a href="{% url 'storefront' %}?category={{ product.category }}">{{ product.get_category_display }}</a>
+                    <span>/</span>
+                    <span class="active">{{ product.title }}</span>
+                </div>
+
+                <h2 class="ks-detail-info">{{ product.title }}</h2>
+
+                <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
+                    <span class="ks-badge ks-badge-craft">{{ product.art_form }}</span>
+                    <span class="ks-badge ks-badge-category">{{ product.get_category_display }}</span>
+                    {% if gi_tag %}
+                    <span class="ks-gi-badge" title="GI Tag: {{ gi_tag.name }} ({{ gi_tag.gi_number }})">
+                        <i class="bi bi-patch-check-fill me-1"></i>GI Certified · {{ gi_tag.state }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                {% if product.price %}
+                <div class="ks-detail-price">₹{{ product.price }}</div>
+                {% elif product.suggested_price %}
+                <div class="ks-detail-price" style="color:var(--ks-muted);">₹{{ product.suggested_price }}</div>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-2 mb-3 flex-wrap">
+                    <button class="btn ks-btn-wishlist {% if is_wishlisted %}active{% endif %}" onclick="toggleWishlist('{{ product.id }}')" id="wishlistBtn">
+                        <i class="bi bi-heart{% if is_wishlisted %}-fill{% endif %}" id="wishlistIcon"></i>
+                        <span id="wishlistText">{% if is_wishlisted %}Saved{% else %}Save{% endif %}</span>
+                    </button>
+                    <a href="{% url 'product_qr' product.id %}" class="btn ks-btn-outline btn-sm">
+                        <i class="bi bi-qr-code me-1"></i>QR Code
+                    </a>
+                </div>
+
+                <p class="ks-detail-desc" id="productDesc">{{ product.description }}</p>
+
+                <!-- Translate Buttons -->
+                <div class="mb-3">
+                    <small class="text-muted me-2">Translate to:</small>
+                    <button class="btn btn-sm ks-translate-btn" onclick="translateDesc('{{ product.id }}', 'Hindi')">Hindi</button>
+                    <button class="btn btn-sm ks-translate-btn" onclick="translateDesc('{{ product.id }}', 'Tamil')">Tamil</button>
+                    <button class="btn btn-sm ks-translate-btn" onclick="translateDesc('{{ product.id }}', 'Telugu')">Telugu</button>
+                    <button class="btn btn-sm ks-translate-btn" onclick="translateDesc('{{ product.id }}', 'Bengali')">Bengali</button>
+                    <button class="btn btn-sm ks-translate-btn" onclick="translateDesc('{{ product.id }}', 'Marathi')">Marathi</button>
+                    <button class="btn btn-sm ks-translate-btn" onclick="translateDesc('{{ product.id }}', 'Kannada')">Kannada</button>
+                    <button class="btn btn-sm ks-translate-btn" onclick="translateDesc('{{ product.id }}', 'Gujarati')">Gujarati</button>
+                    <button class="btn btn-sm ks-translate-btn" onclick="document.getElementById('productDesc').textContent='{{ product.description|escapejs }}'">Original</button>
+                </div>
+
+                <!-- Meta -->
+                <div class="ks-detail-meta">
+                    {% if product.materials %}
+                    <div class="ks-detail-meta-item">
+                        <strong><i class="bi bi-layers"></i> Materials</strong>
+                        <span>{{ product.materials }}</span>
+                    </div>
+                    {% endif %}
+                    {% if product.techniques %}
+                    <div class="ks-detail-meta-item">
+                        <strong><i class="bi bi-tools"></i> Techniques</strong>
+                        <span>{{ product.techniques }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Artisan -->
+                <div class="ks-artisan-inline">
+                    {% if product.artisan.photo %}
+                    <img src="{{ product.artisan.photo.url }}" alt="{{ product.artisan.name }}">
+                    {% else %}
+                    <div class="ks-artisan-inline-placeholder">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h6 style="margin:0;">
+                            <a href="{% url 'artisan_profile' product.artisan.id %}" style="color:var(--ks-dark);">{{ product.artisan.name }}</a>
+                        </h6>
+                        <small class="text-muted">{{ product.artisan.craft_type }} · {{ product.artisan.location }}{% if product.artisan.state %}, {{ product.artisan.state }}{% endif %}</small>
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                {% if product.tag_list %}
+                <div class="mt-3">
+                    {% for tag in product.tag_list %}
+                    <a href="{% url 'storefront' %}?q={{ tag }}" class="ks-tag text-decoration-none">{{ tag }}</a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- GI Tag Detail -->
+        {% if gi_tag %}
+        <div class="row mt-4">
+            <div class="col-md-8 mx-auto">
+                <div class="ks-gi-detail-card">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="ks-gi-icon"><i class="bi bi-patch-check-fill"></i></div>
+                        <div>
+                            <h5 class="mb-1">GI Tag: {{ gi_tag.name }}</h5>
+                            <p class="mb-1 small"><strong>GI Number:</strong> {{ gi_tag.gi_number }} · <strong>Region:</strong> {{ gi_tag.region }}, {{ gi_tag.state }} · <strong>Year:</strong> {{ gi_tag.year }}</p>
+                            <p class="mb-0 small text-muted">{{ gi_tag.description }}</p>
+                            {% if gi_tag.unesco %}<span class="badge bg-success mt-1"><i class="bi bi-globe me-1"></i>UNESCO Heritage</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Cultural Story -->
+        {% if product.cultural_story %}
+        <div class="row mt-4">
+            <div class="col-md-8 mx-auto">
+                <div class="ks-story-card">
+                    <h4><i class="bi bi-book me-2"></i>The Story Behind This Craft</h4>
+                    <p>{{ product.cultural_story }}</p>
+                    <a href="{% url 'heritage_story' product.id %}" class="btn btn-sm mt-2" style="background:linear-gradient(135deg,#1B1B1B,#2d1f14);color:#fff;">
+                        <i class="bi bi-bank me-1"></i> Read Full Heritage Story
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="row mt-4">
+            <div class="col-md-8 mx-auto text-center">
+                <a href="{% url 'heritage_story' product.id %}" class="btn btn-sm ks-btn-outline">
+                    <i class="bi bi-bank me-1"></i> Generate Heritage Story
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Order / Contact Artisan (buyers only) -->
+        {% if current_buyer %}
+        <div class="row mt-4">
+            <div class="col-md-6 mx-auto">
+                <div class="ks-card p-4">
+                    <h5><i class="bi bi-bag-plus me-2"></i>Interested? Contact the Artisan</h5>
+                    <form id="orderForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Message to Artisan</label>
+                            <textarea name="message" class="form-control" rows="3" placeholder="I'm interested in this product..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" name="quantity" class="form-control" value="1" min="1" style="max-width:100px;">
+                        </div>
+                        <button type="submit" class="btn ks-btn-primary" id="orderBtn">
+                            <i class="bi bi-send me-1"></i> Send Inquiry
+                        </button>
+                        <div id="orderResult" class="mt-2"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% elif not current_artisan %}
+        <div class="row mt-4">
+            <div class="col-md-6 mx-auto text-center">
+                <div class="ks-card p-4">
+                    <p class="mb-2 text-muted">Sign in as a buyer to contact this artisan</p>
+                    <a href="{% url 'buyer_login' %}" class="btn ks-btn-primary btn-sm"><i class="bi bi-box-arrow-in-right me-1"></i> Buyer Sign In</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Related Products -->
+        {% if related_products %}
+        <div class="mt-5">
+            <div class="ks-section-header">
+                <span class="ks-label">Recommended</span>
+                <h3 class="ks-section-title" style="font-size:1.6rem;">You May Also Like</h3>
+            </div>
+            <div class="row g-4">
+                {% for rp in related_products %}
+                <div class="col-md-3 col-6">
+                    <a href="{% url 'product_detail' rp.id %}" class="text-decoration-none">
+                        <div class="ks-product-card">
+                            <div class="ks-product-img" style="height:180px;">
+                                <img src="{{ rp.image.url }}" alt="{{ rp.title }}">
+                            </div>
+                            <div class="ks-product-info">
+                                <h6>{{ rp.title }}</h6>
+                                {% if rp.price %}
+                                <span class="ks-product-price">₹{{ rp.price }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleWishlist(pid) {
+    fetch(`/product/${pid}/wishlist/`, {method:'POST', headers:{'X-CSRFToken':document.querySelector('[name=csrfmiddlewaretoken]').value}})
+    .then(r => {
+        if (r.status === 401) { r.json().then(d => window.location = d.login_url); return; }
+        return r.json();
+    })
+    .then(d => {
+        if (!d) return;
+        const icon = document.getElementById('wishlistIcon');
+        const text = document.getElementById('wishlistText');
+        const btn = document.getElementById('wishlistBtn');
+        if (d.wishlisted) {
+            icon.className = 'bi bi-heart-fill';
+            text.textContent = 'Saved';
+            btn.classList.add('active');
+        } else {
+            icon.className = 'bi bi-heart';
+            text.textContent = 'Save';
+            btn.classList.remove('active');
+        }
+    });
+}
+
+function translateDesc(pid, lang) {
+    const desc = document.getElementById('productDesc');
+    desc.innerHTML = '<span class="text-muted"><i class="bi bi-translate"></i> Translating...</span>';
+    fetch(`/product/${pid}/translate/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value, 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `language=${lang}`
+    })
+    .then(r => r.json())
+    .then(d => { desc.textContent = d.success ? d.content : 'Translation failed'; })
+    .catch(() => { desc.textContent = 'Translation failed'; });
+}
+
+document.getElementById('orderForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const fd = new FormData(this);
+    const btn = document.getElementById('orderBtn');
+    const res = document.getElementById('orderResult');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Sending...';
+    fetch('/product/{{ product.id }}/order/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': fd.get('csrfmiddlewaretoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: new URLSearchParams({message: fd.get('message'), quantity: fd.get('quantity')})
+    })
+    .then(r => {
+        if (r.status === 401) { r.json().then(d => window.location = d.login_url); return; }
+        return r.json();
+    })
+    .then(d => {
+        if (!d) return;
+        if (d.success) {
+            res.innerHTML = '<div class="alert alert-success py-2 small">Inquiry sent! The artisan will get back to you.</div>';
+            btn.innerHTML = '<i class="bi bi-check-circle me-1"></i> Sent!';
+        } else {
+            res.innerHTML = '<div class="alert alert-danger py-2 small">' + (d.error || 'Error') + '</div>';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-send me-1"></i> Send Inquiry';
+        }
+    })
+    .catch(() => {
+        res.innerHTML = '<div class="alert alert-danger py-2 small">Network error</div>';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-send me-1"></i> Send Inquiry';
+    });
+});
+</script>
+{% endblock %}

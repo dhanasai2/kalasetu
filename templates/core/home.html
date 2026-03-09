@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}KalaSetu — AI Marketplace for Indian Artisans{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="ks-hero">
+    <div class="container">
+        <div class="row align-items-center min-vh-85">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <div class="ks-hero-badge">
+                    <i class="bi bi-stars"></i> Powered by Google Gemini AI
+                </div>
+                <h1 class="ks-hero-title">
+                    Every Craft<br>Tells a <span class="text-gradient">Story</span>
+                </h1>
+                <p class="ks-hero-sub">
+                    KalaSetu transforms a single photo of your craft into a complete digital storefront — 
+                    with AI‑written descriptions, cultural stories, pricing, and marketing content. 
+                    In any Indian language. In 60 seconds.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{% url 'artisan_register' %}" class="btn ks-btn-primary btn-lg px-4">
+                        <i class="bi bi-sparkle me-1"></i> I'm an Artisan
+                    </a>
+                    <a href="{% url 'storefront' %}" class="btn ks-btn-outline btn-lg px-4">
+                        Explore Crafts <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="ks-hero-stats">
+                    <div class="ks-stat">
+                        <strong>60s</strong>
+                        <span>Photo → Listing</span>
+                    </div>
+                    <div class="ks-stat-divider"></div>
+                    <div class="ks-stat">
+                        <strong>10+</strong>
+                        <span>Languages</span>
+                    </div>
+                    <div class="ks-stat-divider"></div>
+                    <div class="ks-stat">
+                        <strong>Zero</strong>
+                        <span>Typing Needed</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="ks-hero-visual">
+                    <div class="ks-float-card card-1">
+                        <i class="bi bi-camera"></i>
+                        <span>Snap a photo</span>
+                    </div>
+                    <div class="ks-float-card card-2">
+                        <i class="bi bi-stars"></i>
+                        <span>AI generates listing</span>
+                    </div>
+                    <div class="ks-float-card card-3">
+                        <i class="bi bi-shop-window"></i>
+                        <span>Go live instantly</span>
+                    </div>
+                    <div class="ks-hero-circle"></div>
+                    <div class="ks-hero-circle circle-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="ks-section" id="how">
+    <div class="container">
+        <div class="ks-section-header">
+            <span class="ks-label">How It Works</span>
+            <h2 class="ks-section-title">From Photo to Storefront<br>in Three Steps</h2>
+        </div>
+        <div class="row g-4 g-lg-5">
+            <div class="col-md-4">
+                <div class="ks-step-card">
+                    <div class="ks-step-num">01</div>
+                    <div class="ks-step-icon"><i class="bi bi-phone"></i></div>
+                    <h5>Capture Your Craft</h5>
+                    <p>Take a photo and speak about your product in your own language. Our voice input supports Hindi, Tamil, Bengali, and 10+ Indian languages.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="ks-step-card">
+                    <div class="ks-step-num">02</div>
+                    <div class="ks-step-icon"><i class="bi bi-cpu"></i></div>
+                    <h5>AI Creates Everything</h5>
+                    <p>Gemini Vision identifies the art form, writes a compelling description, uncovers the cultural heritage, suggests a price, and generates SEO tags.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="ks-step-card">
+                    <div class="ks-step-num">03</div>
+                    <div class="ks-step-icon"><i class="bi bi-megaphone"></i></div>
+                    <h5>Market &amp; Sell</h5>
+                    <p>Get instant Instagram posts, Facebook campaigns, trend analysis, and hashtag strategies. Your handmade craft reaches the world — effortlessly.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Bento Grid -->
+<section class="ks-section ks-section-alt">
+    <div class="container">
+        <div class="ks-section-header">
+            <span class="ks-label">Features</span>
+            <h2 class="ks-section-title">Everything an Artisan Needs</h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="ks-bento-card ks-bento-large">
+                    <div class="ks-bento-icon"><i class="bi bi-eye"></i></div>
+                    <h4>AI Vision Analysis</h4>
+                    <p>Upload a photo and Gemini identifies the art form — Madhubani, Warli, Bidri, Phulkari, or 50+ others. It detects materials, techniques, and motif symbolism automatically.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="ks-bento-card">
+                    <div class="ks-bento-icon"><i class="bi bi-mic"></i></div>
+                    <h5>Voice-First Input</h5>
+                    <p>Speak in your language. No typing, no English needed.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="ks-bento-card">
+                    <div class="ks-bento-icon"><i class="bi bi-currency-rupee"></i></div>
+                    <h5>Smart Pricing</h5>
+                    <p>AI suggests fair market prices based on craft complexity.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="ks-bento-card">
+                    <div class="ks-bento-icon"><i class="bi bi-instagram"></i></div>
+                    <h5>Social Content</h5>
+                    <p>Auto-generated posts, captions, and hashtags ready to publish.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="ks-bento-card">
+                    <div class="ks-bento-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    <h5>Trend Matching</h5>
+                    <p>See which trends your craft aligns with and how to position it.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="ks-bento-card ks-bento-large">
+                    <div class="ks-bento-icon"><i class="bi bi-chat-dots"></i></div>
+                    <h4>AI Shopping Assistant</h4>
+                    <p>Buyers chat with KalaSetu's AI to discover crafts by occasion, budget, region, or style. The assistant knows every artisan and tells their story to connect buyers emotionally.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="ks-section">
+    <div class="container">
+        <div class="ks-section-header">
+            <span class="ks-label">Marketplace</span>
+            <h2 class="ks-section-title">Featured Crafts</h2>
+        </div>
+        {% if featured_products %}
+        <div class="row g-4">
+            {% for product in featured_products %}
+            <div class="col-lg-3 col-md-4 col-6">
+                <a href="{% url 'product_detail' product.id %}" class="text-decoration-none">
+                    <div class="ks-product-card">
+                        <div class="ks-product-img">
+                            <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                            <span class="ks-product-badge">{{ product.art_form }}</span>
+                        </div>
+                        <div class="ks-product-info">
+                            <h6>{{ product.title }}</h6>
+                            <div class="ks-product-meta">
+                                <span class="ks-product-artist"><i class="bi bi-person"></i> {{ product.artisan.name }}</span>
+                                {% if product.price %}
+                                <span class="ks-product-price">₹{{ product.price }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-5">
+            <a href="{% url 'storefront' %}" class="btn ks-btn-outline btn-lg px-5">View All Crafts <i class="bi bi-arrow-right ms-1"></i></a>
+        </div>
+        {% else %}
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="ks-showcase-card" style="--accent: #e65100;">
+                    <div class="ks-showcase-icon"><i class="bi bi-palette2"></i></div>
+                    <h5>Madhubani Paintings</h5>
+                    <p>Intricate mythological art from Bihar's Mithila region, painted with natural dyes on handmade paper.</p>
+                    <span class="ks-showcase-price">From ₹500</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="ks-showcase-card" style="--accent: #0d47a1;">
+                    <div class="ks-showcase-icon"><i class="bi bi-droplet-half"></i></div>
+                    <h5>Jaipur Blue Pottery</h5>
+                    <p>Hand-painted quartz pottery with Persian-inspired floral motifs in cobalt blue and turquoise.</p>
+                    <span class="ks-showcase-price">From ₹300</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="ks-showcase-card" style="--accent: #1b5e20;">
+                    <div class="ks-showcase-icon"><i class="bi bi-brush"></i></div>
+                    <h5>Warli Tribal Art</h5>
+                    <p>2,500-year-old tribal paintings from Maharashtra using minimalist geometric figures and rice paste.</p>
+                    <span class="ks-showcase-price">From ₹300</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="ks-showcase-card" style="--accent: #4a148c;">
+                    <div class="ks-showcase-icon"><i class="bi bi-gem"></i></div>
+                    <h5>Dhokra Metalwork</h5>
+                    <p>4,000-year-old lost-wax brass casting from Bastar — each piece is completely unique.</p>
+                    <span class="ks-showcase-price">From ₹800</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="ks-showcase-card" style="--accent: #b71c1c;">
+                    <div class="ks-showcase-icon"><i class="bi bi-scissors"></i></div>
+                    <h5>Chikankari Embroidery</h5>
+                    <p>Mughal-era white-on-white hand-embroidery from Lucknow using 36 traditional stitches.</p>
+                    <span class="ks-showcase-price">From ₹1,200</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="ks-showcase-card" style="--accent: #006064;">
+                    <div class="ks-showcase-icon"><i class="bi bi-flower1"></i></div>
+                    <h5>Kalamkari Textiles</h5>
+                    <p>Hand-painted cotton art from Andhra Pradesh depicting mythological scenes with natural dyes.</p>
+                    <span class="ks-showcase-price">From ₹600</span>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-5">
+            <a href="{% url 'artisan_register' %}" class="btn ks-btn-primary btn-lg px-5"><i class="bi bi-sparkle me-1"></i> List Your Craft</a>
+            <a href="{% url 'chat_page' %}" class="btn ks-btn-outline btn-lg px-5 ms-3"><i class="bi bi-chat-dots me-1"></i> Explore via Chat</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Artisans -->
+<section class="ks-section ks-section-alt">
+    <div class="container">
+        <div class="ks-section-header">
+            <span class="ks-label">Community</span>
+            <h2 class="ks-section-title">Meet Our Artisans</h2>
+        </div>
+        {% if artisans %}
+        <div class="row g-4 justify-content-center">
+            {% for artisan in artisans %}
+            <div class="col-lg-2 col-md-3 col-4">
+                <a href="{% url 'artisan_profile' artisan.id %}" class="text-decoration-none">
+                    <div class="ks-artisan-card text-center">
+                        {% if artisan.photo %}
+                        <img src="{{ artisan.photo.url }}" alt="{{ artisan.name }}" class="ks-artisan-avatar">
+                        {% else %}
+                        <div class="ks-artisan-avatar ks-avatar-placeholder">
+                            {{ artisan.name|first }}
+                        </div>
+                        {% endif %}
+                        <h6 class="mt-2 mb-0">{{ artisan.name }}</h6>
+                        <small class="text-muted">{{ artisan.craft_type }}</small>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="ks-artisan-showcase">
+                    <div class="ks-artisan-showcase-avatar">P</div>
+                    <div>
+                        <h6 class="mb-0">Priya Devi</h6>
+                        <small class="text-muted">Madhubani Painting, Bihar</small>
+                        <p class="mt-2 mb-0" style="font-size:.85rem;color:var(--ks-muted);">Master artist carrying forward five generations of Mithila art tradition using natural dyes.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="ks-artisan-showcase">
+                    <div class="ks-artisan-showcase-avatar">R</div>
+                    <div>
+                        <h6 class="mb-0">Ramesh Joshi</h6>
+                        <small class="text-muted">Blue Pottery, Rajasthan</small>
+                        <p class="mt-2 mb-0" style="font-size:.85rem;color:var(--ks-muted);">Fourth-generation artisan creating Persian-inspired quartz pottery in Jaipur.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="ks-artisan-showcase">
+                    <div class="ks-artisan-showcase-avatar">S</div>
+                    <div>
+                        <h6 class="mb-0">Suresh Warli</h6>
+                        <small class="text-muted">Warli Art, Maharashtra</small>
+                        <p class="mt-2 mb-0" style="font-size:.85rem;color:var(--ks-muted);">Tribal artist bringing 2,500-year-old Warli traditions to modern canvases.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'artisan_register' %}" class="btn ks-btn-outline btn-lg"><i class="bi bi-plus-lg me-1"></i> Join as an Artisan</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="ks-cta">
+    <div class="container text-center">
+        <h2 class="ks-cta-title">Ready to Share Your Craft<br>with the World?</h2>
+        <p class="ks-cta-sub">No digital skills needed. Just your art and a phone camera.</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{% url 'artisan_register' %}" class="btn ks-btn-white btn-lg px-5">
+                Start for Free <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+            <a href="{% url 'chat_page' %}" class="btn ks-btn-ghost btn-lg px-5">
+                <i class="bi bi-chat-dots me-1"></i> Chat with AI
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

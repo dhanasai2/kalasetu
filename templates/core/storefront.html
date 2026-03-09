@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Shop Indian Crafts{% endblock %}
+
+{% block content %}
+<!-- Storefront Hero -->
+<section class="ks-section">
+    <div class="container">
+        <div class="ks-section-header">
+            <span class="ks-label">Marketplace</span>
+            <h2 class="ks-section-title">Discover Indian Crafts</h2>
+            <p style="color:var(--ks-muted);max-width:520px;margin:0 auto;">Every product has a story. Explore handmade art from India's finest artisans.</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="ks-filter-bar">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label" style="font-weight:600;font-size:.85rem;">Search</label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="border:1.5px solid var(--ks-border);border-right:0;border-radius:var(--ks-radius-sm) 0 0 var(--ks-radius-sm);background:#fff;"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" class="form-control" placeholder="Search crafts, art forms, artisans..." value="{{ query }}" style="border:1.5px solid var(--ks-border);border-left:0;border-radius:0 var(--ks-radius-sm) var(--ks-radius-sm) 0;">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" style="font-weight:600;font-size:.85rem;">Category</label>
+                    <select name="category" class="form-select" style="border:1.5px solid var(--ks-border);border-radius:var(--ks-radius-sm);">
+                        <option value="">All Categories</option>
+                        {% for value, label in categories %}
+                        <option value="{{ value }}" {% if selected_category == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" style="font-weight:600;font-size:.85rem;">Art Form</label>
+                    <select name="art_form" class="form-select" style="border:1.5px solid var(--ks-border);border-radius:var(--ks-radius-sm);">
+                        <option value="">All Art Forms</option>
+                        {% for af in art_forms %}
+                        {% if af %}
+                        <option value="{{ af }}" {% if selected_art_form == af %}selected{% endif %}>{{ af }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn ks-btn-primary w-100" style="padding:.6rem;"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Product Grid -->
+        {% if products %}
+        <div class="row g-4">
+            {% for product in products %}
+            <div class="col-lg-3 col-md-4 col-6">
+                <div class="ks-product-card position-relative">
+                    <button class="ks-wishlist-heart {% if product.id in wishlist_ids %}active{% endif %}"
+                            onclick="event.preventDefault();toggleWish('{{ product.id }}', this);"
+                            title="Save to Wishlist">
+                        <i class="bi bi-heart{% if product.id in wishlist_ids %}-fill{% endif %}"></i>
+                    </button>
+                    <a href="{% url 'product_detail' product.id %}" class="text-decoration-none">
+                        <div class="ks-product-img">
+                            <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                            <span class="ks-product-badge">{{ product.art_form }}</span>
+                        </div>
+                        <div class="ks-product-info">
+                            <h6>{{ product.title }}</h6>
+                            <div class="ks-product-meta">
+                                <span class="ks-product-artist"><i class="bi bi-person"></i> {{ product.artisan.name }}</span>
+                                {% if product.price %}
+                                <span class="ks-product-price">₹{{ product.price }}</span>
+                                {% elif product.suggested_price %}
+                                <span class="ks-product-price" style="color:var(--ks-muted);">₹{{ product.suggested_price }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="ks-empty-state-rich">
+            <div class="ks-empty-illustration">
+                <i class="bi bi-shop-window"></i>
+            </div>
+            <h4>Our marketplace is just getting started!</h4>
+            <p>Artisans across India are uploading their handcrafted treasures. Be the first to discover them, or chat with our AI to explore Indian crafts.</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap mt-3">
+                <a href="{% url 'chat_page' %}" class="btn ks-btn-primary"><i class="bi bi-chat-dots me-1"></i> Chat with AI Assistant</a>
+                <a href="{% url 'artisan_register' %}" class="btn ks-btn-outline"><i class="bi bi-plus-lg me-1"></i> List Your Craft</a>
+            </div>
+            <div class="row g-3 mt-4" style="max-width:740px;margin:0 auto;">
+                <div class="col-md-4 col-6">
+                    <div class="ks-craft-chip"><i class="bi bi-palette2"></i> Madhubani</div>
+                </div>
+                <div class="col-md-4 col-6">
+                    <div class="ks-craft-chip"><i class="bi bi-droplet-half"></i> Blue Pottery</div>
+                </div>
+                <div class="col-md-4 col-6">
+                    <div class="ks-craft-chip"><i class="bi bi-brush"></i> Warli Art</div>
+                </div>
+                <div class="col-md-4 col-6">
+                    <div class="ks-craft-chip"><i class="bi bi-gem"></i> Dhokra</div>
+                </div>
+                <div class="col-md-4 col-6">
+                    <div class="ks-craft-chip"><i class="bi bi-scissors"></i> Chikankari</div>
+                </div>
+                <div class="col-md-4 col-6">
+                    <div class="ks-craft-chip"><i class="bi bi-flower1"></i> Kalamkari</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Chat CTA -->
+        <div class="text-center mt-5" style="background:var(--ks-light);border-radius:var(--ks-radius);padding:2.5rem 1.5rem;">
+            <h5>Not sure what you're looking for?</h5>
+            <p class="text-muted" style="font-size:.92rem;">Ask our AI shopping assistant — it knows every craft and artisan in our catalog.</p>
+            <a href="{% url 'chat_page' %}" class="btn ks-btn-primary btn-lg mt-1"><i class="bi bi-chat-dots me-1"></i> Chat with KalaSetu</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleWish(pid, btn) {
+    fetch(`/product/${pid}/wishlist/`, {method:'POST', headers:{'X-CSRFToken':'{{ csrf_token }}'}})
+    .then(r => {
+        if (r.status === 401) { window.location = '/buyer/login/'; return; }
+        return r.json();
+    })
+    .then(d => {
+        if (!d) return;
+        const icon = btn.querySelector('i');
+        if (d.wishlisted) {
+            icon.className = 'bi bi-heart-fill';
+            btn.classList.add('active');
+        } else {
+            icon.className = 'bi bi-heart';
+            btn.classList.remove('active');
+        }
+    });
+}
+</script>
+{% endblock %}

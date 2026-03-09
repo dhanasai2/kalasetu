@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}AI Craft Mentor — {{ artisan.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="ks-section-title mb-1"><i class="bi bi-robot me-2"></i>AI Craft Mentor</h2>
+            <p class="text-muted mb-0">Personalized business coaching for {{ artisan.name }}</p>
+        </div>
+        <a href="{% url 'artisan_dashboard' artisan.id %}" class="btn ks-btn-outline btn-sm"><i class="bi bi-arrow-left me-1"></i> Dashboard</a>
+    </div>
+
+    <!-- Current Stats Summary -->
+    <div class="row g-3 mb-4">
+        <div class="col-4 col-md-2">
+            <div class="ks-stat-card text-center p-3">
+                <div class="ks-stat-number" style="font-size:1.3rem;">{{ total_views }}</div>
+                <div class="ks-stat-label" style="font-size:.72rem;">Views</div>
+            </div>
+        </div>
+        <div class="col-4 col-md-2">
+            <div class="ks-stat-card text-center p-3">
+                <div class="ks-stat-number" style="font-size:1.3rem;">{{ total_orders }}</div>
+                <div class="ks-stat-label" style="font-size:.72rem;">Orders</div>
+            </div>
+        </div>
+        <div class="col-4 col-md-2">
+            <div class="ks-stat-card text-center p-3">
+                <div class="ks-stat-number" style="font-size:1.3rem;">{{ total_wishlist }}</div>
+                <div class="ks-stat-label" style="font-size:.72rem;">Wishlist</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="ks-stat-card text-center p-3">
+                <div class="ks-stat-number" style="font-size:1.3rem;">{{ total_products }}</div>
+                <div class="ks-stat-label" style="font-size:.72rem;">Products</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="ks-stat-card text-center p-3">
+                <div class="ks-stat-number" style="font-size:1.3rem;">{{ published_count }}</div>
+                <div class="ks-stat-label" style="font-size:.72rem;">Published</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate Button -->
+    <div class="text-center mb-4">
+        <form method="POST" id="mentorForm">
+            {% csrf_token %}
+            <button type="submit" class="btn ks-btn-primary btn-lg" id="mentorBtn">
+                <i class="bi bi-stars me-2"></i> Get AI Mentor Advice
+            </button>
+            <p class="text-muted mt-2" style="font-size:.85rem;">AI will analyze your performance data and generate personalized business coaching</p>
+        </form>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="mentorLoading" class="text-center py-5 d-none">
+        <div class="spinner-border" style="color:var(--ks-primary);width:3rem;height:3rem;" role="status"></div>
+        <p class="mt-3 text-muted">Your AI mentor is analyzing your data...<br><small>This may take 10-20 seconds</small></p>
+    </div>
+
+    <!-- Advice Result -->
+    {% if advice %}
+    <div class="ks-card p-4 p-md-5" id="mentorResult">
+        <div class="d-flex align-items-center gap-2 mb-4">
+            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;background:linear-gradient(135deg,var(--ks-primary),#e07a3a);color:#fff;font-size:1.4rem;flex-shrink:0;">
+                <i class="bi bi-robot"></i>
+            </div>
+            <div>
+                <h5 class="mb-0">Your AI Mentor Report</h5>
+                <small class="text-muted">Personalized for {{ artisan.name }} · {{ artisan.craft_type }}</small>
+            </div>
+        </div>
+        <div class="mentor-content" id="mentorContent">
+            {{ advice|safe }}
+        </div>
+    </div>
+    {% elif not advice and request.method == 'POST' %}
+    <div class="alert alert-warning text-center">
+        <i class="bi bi-exclamation-triangle me-1"></i> Could not generate advice at this time. Please try again.
+    </div>
+    {% else %}
+    <!-- Empty state -->
+    <div class="ks-card p-5 text-center">
+        <div style="font-size:4rem;opacity:0.3;"><i class="bi bi-robot"></i></div>
+        <h4 class="mt-3">Your Personal Business Coach</h4>
+        <p class="text-muted mx-auto" style="max-width:500px;">
+            The AI Craft Mentor analyzes your products, views, orders, and marketing data to give you
+            <strong>specific, actionable advice</strong> tailored to your craft and business.
+        </p>
+        <ul class="list-unstyled text-start mx-auto" style="max-width:400px;">
+            <li class="mb-2"><i class="bi bi-check-circle-fill me-2" style="color:var(--ks-primary);"></i> Performance score & strengths analysis</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill me-2" style="color:var(--ks-primary);"></i> Quick wins you can do this week</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill me-2" style="color:var(--ks-primary);"></i> Pricing strategy recommendations</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill me-2" style="color:var(--ks-primary);"></i> 7-day social media playbook</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill me-2" style="color:var(--ks-primary);"></i> Photography tips for your craft</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill me-2" style="color:var(--ks-primary);"></i> 30-day growth roadmap</li>
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+<script>
+// Show loading state on form submit
+document.getElementById('mentorForm')?.addEventListener('submit', function() {
+    document.getElementById('mentorBtn').disabled = true;
+    document.getElementById('mentorBtn').innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Analyzing...';
+    document.getElementById('mentorLoading')?.classList.remove('d-none');
+});
+
+// Render markdown in advice
+const content = document.getElementById('mentorContent');
+if (content) {
+    content.innerHTML = marked.parse(content.textContent);
+}
+</script>
+<style>
+.mentor-content h1, .mentor-content h2, .mentor-content h3 {
+    color: var(--ks-dark);
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+.mentor-content h2 { font-size: 1.25rem; }
+.mentor-content h3 { font-size: 1.1rem; }
+.mentor-content ul { padding-left: 1.2rem; }
+.mentor-content li { margin-bottom: 0.4rem; line-height: 1.6; }
+.mentor-content p { line-height: 1.7; }
+.mentor-content strong { color: var(--ks-primary); }
+.mentor-content hr { margin: 1.5rem 0; opacity: 0.15; }
+</style>
+{% endblock %}

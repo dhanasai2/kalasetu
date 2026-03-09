@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Artisan Login{% endblock %}
+
+{% block extra_css %}
+<style>
+.ks-login-page { min-height: 80vh; display: flex; align-items: center; padding: 2rem 0; }
+.ks-login-card {
+    max-width: 480px; margin: 0 auto; width: 100%;
+    background: var(--ks-card-bg);
+    border: 1px solid var(--ks-border);
+    border-radius: var(--ks-radius);
+    box-shadow: var(--ks-shadow-lg);
+    overflow: hidden;
+}
+.ks-login-header {
+    background: linear-gradient(135deg, var(--ks-primary), var(--ks-accent));
+    padding: 2.5rem 2rem 2rem;
+    text-align: center; color: #fff;
+}
+.ks-login-header .ks-login-icon {
+    width: 64px; height: 64px; border-radius: 16px;
+    background: rgba(255,255,255,.2); backdrop-filter: blur(8px);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; margin-bottom: 1rem;
+}
+.ks-login-header h3 { font-family: var(--ks-serif); margin: 0 0 .3rem; font-size: 1.5rem; color: #fff; }
+.ks-login-header p { margin: 0; opacity: .9; font-size: .9rem; }
+.ks-login-body { padding: 2rem; }
+.ks-login-body .form-label { font-weight: 600; font-size: .9rem; margin-bottom: .4rem; }
+.ks-login-body .form-control {
+    border-radius: var(--ks-radius-sm); padding: .75rem 1rem;
+    border: 1.5px solid var(--ks-border); font-size: 1rem;
+    transition: all var(--ks-transition);
+}
+.ks-login-body .form-control:focus {
+    border-color: var(--ks-primary); box-shadow: 0 0 0 3px rgba(230,81,0,.12);
+}
+.ks-input-icon-wrap {
+    position: relative;
+}
+.ks-input-icon-wrap .form-control { padding-left: 2.8rem; }
+.ks-input-icon-wrap .ks-input-icon {
+    position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+    color: var(--ks-muted); font-size: 1rem; pointer-events: none;
+}
+.ks-pw-toggle {
+    position: absolute; right: .75rem; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--ks-muted); cursor: pointer;
+    font-size: 1.1rem; padding: 0; line-height: 1;
+}
+.ks-pw-toggle:hover { color: var(--ks-primary); }
+.ks-login-divider {
+    display: flex; align-items: center; gap: 1rem;
+    margin: 1.5rem 0; color: var(--ks-muted); font-size: .85rem;
+}
+.ks-login-divider::before, .ks-login-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--ks-border);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="ks-login-page">
+    <div class="container">
+        <div class="ks-login-card">
+            <div class="ks-login-header">
+                <div class="ks-login-icon"><i class="bi bi-person-check"></i></div>
+                <h3>Welcome Back</h3>
+                <p>Sign in with your email or phone number</p>
+            </div>
+            <div class="ks-login-body">
+                {% if error %}
+                <div class="alert alert-danger rounded-3 py-2" style="font-size:.9rem;">
+                    <i class="bi bi-exclamation-circle me-1"></i> {{ error }}
+                </div>
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Email or Phone Number</label>
+                        <div class="ks-input-icon-wrap">
+                            <i class="bi bi-person ks-input-icon"></i>
+                            <input type="text" name="identifier" class="form-control" placeholder="you@example.com or phone number" required autofocus>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Password</label>
+                        <div class="ks-input-icon-wrap">
+                            <i class="bi bi-lock ks-input-icon"></i>
+                            <input type="password" name="password" id="login-pw" class="form-control" style="padding-right:2.8rem;" placeholder="Enter your password" required>
+                            <button type="button" class="ks-pw-toggle" id="pw-toggle" aria-label="Toggle password visibility">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn ks-btn-primary btn-lg w-100">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                    </button>
+                </form>
+
+                <div class="ks-login-divider">New here?</div>
+                <a href="{% url 'artisan_register' %}" class="btn ks-btn-outline btn-lg w-100">
+                    <i class="bi bi-sparkle me-1"></i> Create Artisan Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const toggle = document.getElementById('pw-toggle');
+const pwField = document.getElementById('login-pw');
+toggle.addEventListener('click', () => {
+    const isPassword = pwField.type === 'password';
+    pwField.type = isPassword ? 'text' : 'password';
+    toggle.querySelector('i').className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
+});
+</script>
+{% endblock %}

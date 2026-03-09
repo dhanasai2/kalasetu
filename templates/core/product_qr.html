@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}QR Code — {{ product.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="ks-card p-5">
+                <h3 class="ks-section-title mb-3">{{ product.title }}</h3>
+                <p class="text-muted mb-4">Scan this QR code to view the product online</p>
+
+                <!-- QR code generated via public API -->
+                <div class="mb-4">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={{ product_url|urlencode }}"
+                         alt="QR Code for {{ product.title }}"
+                         class="img-fluid rounded-3 border p-2"
+                         style="max-width:280px;">
+                </div>
+
+                <p class="small text-muted mb-3">{{ product_url }}</p>
+
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="{{ product_url }}" class="btn ks-btn-primary btn-sm">
+                        <i class="bi bi-eye me-1"></i> View Product
+                    </a>
+                    <button onclick="window.print()" class="btn ks-btn-outline btn-sm">
+                        <i class="bi bi-printer me-1"></i> Print
+                    </button>
+                    <a href="{% url 'artisan_dashboard' product.artisan.id %}" class="btn ks-btn-outline btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+
+                <!-- GI Tag if available -->
+                {% if product.art_form %}
+                <div class="mt-4 pt-3 border-top text-start">
+                    <small class="text-muted">Art Form: <strong>{{ product.art_form }}</strong></small><br>
+                    <small class="text-muted">Artisan: <strong>{{ product.artisan.name }}</strong> · {{ product.artisan.location }}, {{ product.artisan.state }}</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

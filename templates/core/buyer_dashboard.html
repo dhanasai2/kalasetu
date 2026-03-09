@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}My Dashboard — {{ buyer.name }}{% endblock %}
+
+{% block content %}
+<div class="ks-dashboard-page">
+    <div class="container py-5">
+        <!-- Header -->
+        <div class="row align-items-center mb-4">
+            <div class="col">
+                <h2 class="ks-section-title mb-1">Welcome, {{ buyer.name }} <i class="bi bi-heart text-danger"></i></h2>
+                <p class="text-muted">{{ buyer.email }} {% if buyer.location %}· {{ buyer.location }}{% endif %}</p>
+            </div>
+            <div class="col-auto">
+                <a href="{% url 'storefront' %}" class="btn ks-btn-primary"><i class="bi bi-shop me-1"></i> Explore Crafts</a>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="row g-3 mb-5">
+            <div class="col-md-4">
+                <div class="ks-stat-card">
+                    <div class="ks-stat-icon"><i class="bi bi-heart"></i></div>
+                    <div class="ks-stat-number">{{ wishlisted|length }}</div>
+                    <div class="ks-stat-label">Wishlist Items</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="ks-stat-card">
+                    <div class="ks-stat-icon"><i class="bi bi-bag-check"></i></div>
+                    <div class="ks-stat-number">{{ orders|length }}</div>
+                    <div class="ks-stat-label">Orders / Inquiries</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="ks-stat-card">
+                    <div class="ks-stat-icon"><i class="bi bi-chat-dots"></i></div>
+                    <div class="ks-stat-number"><a href="{% url 'chat_page' %}" class="text-decoration-none">Chat</a></div>
+                    <div class="ks-stat-label">AI Shopping Assistant</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wishlist Section -->
+        <h4 class="mb-3"><i class="bi bi-heart-fill text-danger me-2"></i>My Wishlist</h4>
+        {% if wishlisted %}
+        <div class="row g-3 mb-5">
+            {% for item in wishlisted %}
+            <div class="col-md-6 col-lg-3">
+                <div class="ks-product-card h-100">
+                    <a href="{% url 'product_detail' item.product.id %}">
+                        <div class="ks-product-img-wrap">
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" class="ks-product-img">
+                        </div>
+                    </a>
+                    <div class="ks-product-body">
+                        <p class="ks-product-artform">{{ item.product.art_form }}</p>
+                        <h5 class="ks-product-title">{{ item.product.title }}</h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="ks-product-price">₹{{ item.product.price|default:item.product.suggested_price }}</span>
+                            <small class="text-muted">by {{ item.product.artisan.name }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-4 mb-5 bg-light rounded-3">
+            <p class="text-muted mb-2">Your wishlist is empty</p>
+            <a href="{% url 'storefront' %}" class="btn ks-btn-outline btn-sm">Browse Crafts</a>
+        </div>
+        {% endif %}
+
+        <!-- Orders Section -->
+        <h4 class="mb-3"><i class="bi bi-bag-check me-2"></i>My Orders & Inquiries</h4>
+        {% if orders %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>Artisan</th>
+                        <th>Qty</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'product_detail' order.product.id %}" class="text-decoration-none">
+                                {{ order.product.title|truncatechars:40 }}
+                            </a>
+                        </td>
+                        <td>{{ order.product.artisan.name }}</td>
+                        <td>{{ order.quantity }}</td>
+                        <td>
+                            <span class="badge bg-{% if order.status == 'inquiry' %}info{% elif order.status == 'confirmed' %}warning{% elif order.status == 'shipped' %}primary{% else %}success{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ order.created_at|date:"d M Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4 bg-light rounded-3">
+            <p class="text-muted mb-2">No orders yet</p>
+            <a href="{% url 'storefront' %}" class="btn ks-btn-outline btn-sm">Find Something Special</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

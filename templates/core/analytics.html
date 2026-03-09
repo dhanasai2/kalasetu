@@ -1,0 +1,421 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Analytics — {{ artisan.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="ks-section-title mb-1"><i class="bi bi-graph-up me-2"></i>Analytics Dashboard</h2>
+            <p class="text-muted mb-0">{{ artisan.name }} · Performance overview</p>
+        </div>
+        <a href="{% url 'artisan_dashboard' artisan.id %}" class="btn ks-btn-outline btn-sm"><i class="bi bi-arrow-left me-1"></i> Dashboard</a>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="ks-stat-card text-center">
+                <div class="ks-stat-icon"><i class="bi bi-eye"></i></div>
+                <div class="ks-stat-number">{{ total_views }}</div>
+                <div class="ks-stat-label">Total Views</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="ks-stat-card text-center">
+                <div class="ks-stat-icon"><i class="bi bi-heart"></i></div>
+                <div class="ks-stat-number">{{ total_wishlist }}</div>
+                <div class="ks-stat-label">Wishlist Saves</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="ks-stat-card text-center">
+                <div class="ks-stat-icon"><i class="bi bi-bag-check"></i></div>
+                <div class="ks-stat-number">{{ total_orders }}</div>
+                <div class="ks-stat-label">Orders</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="ks-stat-card text-center">
+                <div class="ks-stat-icon"><i class="bi bi-currency-rupee"></i></div>
+                <div class="ks-stat-number">₹{{ total_revenue|floatformat:0 }}</div>
+                <div class="ks-stat-label">Est. Revenue</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary KPI row -->
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-3">
+            <div class="ks-stat-card text-center" style="border-left:3px solid var(--ks-primary);">
+                <div class="ks-stat-number" style="font-size:1.5rem;">{{ total_products }}</div>
+                <div class="ks-stat-label">Total Products</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="ks-stat-card text-center" style="border-left:3px solid #2e7d32;">
+                <div class="ks-stat-number" style="font-size:1.5rem;">{{ published_count }}</div>
+                <div class="ks-stat-label">Published</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="ks-stat-card text-center" style="border-left:3px solid #1565c0;">
+                <div class="ks-stat-number" style="font-size:1.5rem;">{{ total_marketing }}</div>
+                <div class="ks-stat-label">AI Content</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="ks-stat-card text-center" style="border-left:3px solid #6a1b9a;">
+                <div class="ks-stat-number" style="font-size:1.5rem;">{% widthratio published_count total_products 100 %}%</div>
+                <div class="ks-stat-label">Publish Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1: Views/Orders trend + Products Doughnut -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="ks-card p-4">
+                <h5 class="mb-3"><i class="bi bi-activity me-1"></i> Views & Orders — Last 30 Days</h5>
+                <canvas id="viewsChart" height="220"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="ks-card p-4">
+                <h5 class="mb-3"><i class="bi bi-pie-chart me-1"></i> Products</h5>
+                <canvas id="productsChart" height="220"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2: Category Breakdown + Order Status -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="ks-card p-4">
+                <h5 class="mb-3"><i class="bi bi-bar-chart me-1"></i> Products by Category</h5>
+                <canvas id="categoryChart" height="250"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="ks-card p-4">
+                <h5 class="mb-3"><i class="bi bi-clipboard-data me-1"></i> Order Status Breakdown</h5>
+                {% if status_labels != '[]' %}
+                <canvas id="orderStatusChart" height="250"></canvas>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox display-4"></i>
+                    <p class="mt-2">No orders yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 3: Wishlist trend -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-12">
+            <div class="ks-card p-4">
+                <h5 class="mb-3"><i class="bi bi-heart me-1"></i> Wishlist Saves — Last 30 Days</h5>
+                <canvas id="wishlistChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Products & Top Wishlisted side by side -->
+    <div class="row g-4 mb-4">
+        {% if top_products %}
+        <div class="col-lg-6">
+            <div class="ks-card p-4">
+                <h5 class="mb-3"><i class="bi bi-trophy me-1"></i> Top Products by Views</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light"><tr><th>#</th><th>Product</th><th>Views</th><th>Category</th></tr></thead>
+                        <tbody>
+                            {% for p in top_products %}
+                            <tr>
+                                <td><span class="badge rounded-circle bg-{% if forloop.counter == 1 %}warning text-dark{% elif forloop.counter == 2 %}secondary{% else %}light text-dark{% endif %}" style="width:28px;height:28px;line-height:28px;">{{ forloop.counter }}</span></td>
+                                <td><a href="{% url 'product_detail' p.id %}" class="text-decoration-none fw-semibold">{{ p.title|truncatechars:40 }}</a></td>
+                                <td><span class="badge bg-primary rounded-pill">{{ p.view_count }}</span></td>
+                                <td><small class="text-muted">{{ p.get_category_display }}</small></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="col-lg-6">
+            <div class="ks-card p-4">
+                <h5 class="mb-3"><i class="bi bi-heart-fill me-1" style="color:#e53935;"></i> Most Wishlisted</h5>
+                {% if top_wishlisted %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light"><tr><th>#</th><th>Product</th><th>Saves</th></tr></thead>
+                        <tbody>
+                            {% for w in top_wishlisted %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><a href="{% url 'product_detail' w.product__id %}" class="text-decoration-none fw-semibold">{{ w.product__title|truncatechars:40 }}</a></td>
+                                <td><span class="badge bg-danger rounded-pill">{{ w.saves }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-heart display-5"></i>
+                    <p class="mt-2 mb-0">No wishlist saves yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders with Full Details -->
+    <div class="ks-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0"><i class="bi bi-receipt me-1"></i> Recent Orders & Inquiries</h5>
+            <a href="{% url 'artisan_orders' artisan.id %}" class="btn ks-btn-outline btn-sm">View All <i class="bi bi-arrow-right ms-1"></i></a>
+        </div>
+        {% if recent_orders %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="min-width:150px;">Buyer</th>
+                        <th style="min-width:150px;">Product</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                        <th>Message</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Certificate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:var(--ks-primary);color:#fff;font-weight:700;font-size:.85rem;flex-shrink:0;">
+                                    {{ order.buyer.name|first|upper }}
+                                </div>
+                                <div>
+                                    <strong style="font-size:.9rem;">{{ order.buyer.name }}</strong><br>
+                                    <small class="text-muted">{{ order.buyer.email }}</small>
+                                    {% if order.buyer.phone %}<br><small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ order.buyer.phone }}</small>{% endif %}
+                                    {% if order.buyer.location %}<br><small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ order.buyer.location }}</small>{% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{% url 'product_detail' order.product.id %}" class="text-decoration-none">
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if order.product.image %}
+                                    <img src="{{ order.product.image.url }}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:6px;">
+                                    {% endif %}
+                                    <span class="fw-semibold" style="font-size:.88rem;">{{ order.product.title|truncatechars:30 }}</span>
+                                </div>
+                            </a>
+                        </td>
+                        <td><span class="fw-bold">{{ order.quantity }}</span></td>
+                        <td>{% if order.product.price %}₹{{ order.product.price|floatformat:0 }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                        <td class="fw-bold" style="color:var(--ks-primary);">{% if order.product.price %}₹{{ order.product.price|floatformat:0 }}{% else %}—{% endif %}</td>
+                        <td>
+                            {% if order.message %}
+                            <span data-bs-toggle="tooltip" title="{{ order.message }}">
+                                <small>{{ order.message|truncatechars:40 }}</small>
+                            </span>
+                            {% else %}
+                            <small class="text-muted">—</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill bg-{% if order.status == 'inquiry' %}info{% elif order.status == 'confirmed' %}warning text-dark{% elif order.status == 'shipped' %}primary{% else %}success{% endif %}">
+                                <i class="bi bi-{% if order.status == 'inquiry' %}question-circle{% elif order.status == 'confirmed' %}check-circle{% elif order.status == 'shipped' %}truck{% else %}check-all{% endif %} me-1"></i>{{ order.get_status_display }}
+                            </span>
+                        </td>
+                        <td><small>{{ order.created_at|date:"d M Y" }}<br>{{ order.created_at|time:"H:i" }}</small></td>
+                        <td>
+                            <a href="{% url 'order_certificate' order.id %}" target="_blank" class="btn btn-sm ks-btn-outline" title="Download Certificate">
+                                <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox display-4"></i>
+            <p class="mt-2 mb-0">No orders yet. Share your products to start getting inquiries!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+// Shared palette
+const palette = {
+    primary: '#C45B28',
+    green: '#1a6b54',
+    blue: '#1565c0',
+    purple: '#6a1b9a',
+    red: '#c62828',
+    amber: '#f9a825',
+    pink: '#e91e63',
+    teal: '#00897b',
+    grey: '#9e9e9e',
+};
+const chartColors = [palette.primary, palette.green, palette.blue, palette.purple, palette.red, palette.amber, palette.pink, palette.teal, palette.grey, '#5d4037'];
+
+const dailyViews = {{ daily_views|safe }};
+const dailyOrders = {{ daily_orders|safe }};
+const dailyWishlists = {{ daily_wishlists|safe }};
+
+// ── Views & Orders Line Chart ──
+const vCtx = document.getElementById('viewsChart').getContext('2d');
+new Chart(vCtx, {
+    type: 'line',
+    data: {
+        labels: dailyViews.map(d => d.date),
+        datasets: [{
+            label: 'Views',
+            data: dailyViews.map(d => d.total),
+            borderColor: palette.primary,
+            backgroundColor: 'rgba(196,91,40,0.12)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointHoverRadius: 6,
+        }, {
+            label: 'Orders',
+            data: dailyOrders.map(d => d.total),
+            borderColor: palette.green,
+            backgroundColor: 'rgba(26,107,84,0.12)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointHoverRadius: 6,
+        }]
+    },
+    options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { position: 'top' }, tooltip: { mode: 'index', intersect: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+});
+
+// ── Products Doughnut ──
+const pCtx = document.getElementById('productsChart').getContext('2d');
+new Chart(pCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Published', 'Draft'],
+        datasets: [{
+            data: [{{ published_count }}, {{ total_products }} - {{ published_count }}],
+            backgroundColor: [palette.green, '#e0e0e0'],
+            borderWidth: 2,
+        }]
+    },
+    options: {
+        responsive: true,
+        cutout: '65%',
+        plugins: {
+            legend: { position: 'bottom' },
+            tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed + ' products' } }
+        }
+    }
+});
+
+// ── Category Bar Chart ──
+const catLabels = {{ category_labels|safe }};
+const catCounts = {{ category_counts|safe }};
+if (catLabels.length > 0) {
+    const cCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(cCtx, {
+        type: 'bar',
+        data: {
+            labels: catLabels,
+            datasets: [{
+                label: 'Products',
+                data: catCounts,
+                backgroundColor: chartColors.slice(0, catLabels.length),
+                borderRadius: 6,
+                barPercentage: 0.65,
+            }]
+        },
+        options: {
+            responsive: true,
+            indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+}
+
+// ── Order Status Pie Chart ──
+const statusLabels = {{ status_labels|safe }};
+const statusCounts = {{ status_counts|safe }};
+if (statusLabels.length > 0) {
+    const statusColors = {
+        'Inquiry': palette.blue,
+        'Confirmed': palette.amber,
+        'Shipped': palette.purple,
+        'Delivered': palette.green,
+    };
+    const sCtx = document.getElementById('orderStatusChart').getContext('2d');
+    new Chart(sCtx, {
+        type: 'polarArea',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusCounts,
+                backgroundColor: statusLabels.map(l => (statusColors[l] || palette.grey) + 'cc'),
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } },
+            scales: { r: { ticks: { stepSize: 1 } } }
+        }
+    });
+}
+
+// ── Wishlist Area Chart ──
+const wCtx = document.getElementById('wishlistChart').getContext('2d');
+new Chart(wCtx, {
+    type: 'bar',
+    data: {
+        labels: dailyWishlists.map(d => d.date),
+        datasets: [{
+            label: 'Wishlist Saves',
+            data: dailyWishlists.map(d => d.total),
+            backgroundColor: 'rgba(233,30,99,0.6)',
+            borderColor: palette.pink,
+            borderWidth: 1,
+            borderRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+});
+
+// Init Bootstrap tooltips
+document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+</script>
+{% endblock %}

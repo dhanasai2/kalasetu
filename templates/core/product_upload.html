@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Product — {{ artisan.name }}{% endblock %}
+
+{% block content %}
+<section class="ks-section">
+    <div class="container" style="max-width: 720px;">
+        <div class="ks-page-header">
+            <span class="ks-label">New Listing</span>
+            <h2>Upload Your Craft</h2>
+            <p>Take a photo and describe it — AI will create your product listing automatically.</p>
+        </div>
+
+        <div class="ks-card">
+            <div class="ks-card-body">
+                <!-- Image Preview -->
+                <div class="ks-img-preview" id="image-preview-container" style="display:none;">
+                    <img id="image-preview" src="" alt="Preview">
+                </div>
+
+                <form method="post" enctype="multipart/form-data" id="upload-form" class="ks-form">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label class="form-label"><i class="bi bi-image me-1"></i> Product Photo *</label>
+                        {{ form.image }}
+                        <small class="text-muted">Take a clear photo of your craft product</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label"><i class="bi bi-mic me-1"></i> Describe Your Product</label>
+                        <div class="d-flex gap-2 mb-2">
+                            <button type="button" class="ks-voice-btn" id="voice-btn">
+                                <i class="bi bi-mic"></i> Speak
+                            </button>
+                            <small class="text-muted align-self-center">Speak in {{ artisan.language }} or any language</small>
+                        </div>
+                        {{ form.voice_note }}
+                        <small class="text-muted">e.g., "This is a Madhubani painting I made, it took 3 days, my grandmother taught me this art"</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label"><i class="bi bi-currency-rupee me-1"></i> Your Price (optional)</label>
+                        {{ form.price }}
+                        <small class="text-muted">If you leave this blank, AI will suggest a price</small>
+                    </div>
+
+                    {% if form.errors %}
+                    <div class="alert alert-danger rounded-3">
+                        {% for field, errors in form.errors.items %}
+                            <strong>{{ field }}:</strong> {{ errors|join:", " }}<br>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <button type="submit" class="btn ks-btn-primary btn-lg w-100" id="submit-btn">
+                        <i class="bi bi-sparkle me-1"></i> Analyze & Create Listing with AI
+                    </button>
+                    <div class="text-center mt-2">
+                        <small class="text-muted">This may take 10-15 seconds as AI analyzes your craft</small>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="{% url 'artisan_dashboard' artisan.id %}" class="ks-back-link">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Image preview
+document.getElementById('product-image-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            document.getElementById('image-preview').src = ev.target.result;
+            document.getElementById('image-preview-container').style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Loading state on submit
+document.getElementById('upload-form').addEventListener('submit', function() {
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> AI is analyzing your craft...';
+});
+
+// Voice input
+const voiceBtn = document.getElementById('voice-btn');
+const voiceField = document.querySelector('textarea[name="voice_note"]');
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    const langMap = {
+        'Hindi': 'hi-IN', 'Tamil': 'ta-IN', 'Bengali': 'bn-IN',
+        'Telugu': 'te-IN', 'Marathi': 'mr-IN', 'Gujarati': 'gu-IN',
+        'Kannada': 'kn-IN', 'Malayalam': 'ml-IN', 'Odia': 'or-IN',
+        'Punjabi': 'pa-IN', 'English': 'en-IN',
+    };
+    recognition.lang = langMap['{{ artisan.language }}'] || 'hi-IN';
+
+    let isRecording = false;
+    let textBeforeRecording = '';
+    let finalTranscript = '';
+
+    voiceBtn.addEventListener('click', () => {
+        if (isRecording) {
+            recognition.stop();
+            voiceBtn.innerHTML = '<i class="bi bi-mic"></i> Speak';
+            voiceBtn.classList.remove('recording');
+            isRecording = false;
+        } else {
+            textBeforeRecording = voiceField.value;
+            finalTranscript = '';
+            try {
+                recognition.start();
+                voiceBtn.innerHTML = '<i class="bi bi-stop-circle"></i> Stop';
+                voiceBtn.classList.add('recording');
+                isRecording = true;
+            } catch (e) {
+                console.error('Speech recognition start failed:', e);
+            }
+        }
+    });
+
+    recognition.onresult = (event) => {
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                finalTranscript += transcript + ' ';
+            } else {
+                interimTranscript += transcript;
+            }
+        }
+        const sep = textBeforeRecording ? (textBeforeRecording.endsWith(' ') ? '' : ' ') : '';
+        voiceField.value = textBeforeRecording + sep + finalTranscript + interimTranscript;
+    };
+
+    recognition.onend = () => {
+        if (isRecording) {
+            try { recognition.start(); } catch(e) {
+                voiceBtn.innerHTML = '<i class="bi bi-mic"></i> Speak';
+                voiceBtn.classList.remove('recording');
+                isRecording = false;
+            }
+        }
+    };
+
+    recognition.onerror = (event) => {
+        if (event.error !== 'no-speech') {
+            voiceBtn.innerHTML = '<i class="bi bi-mic"></i> Speak';
+            voiceBtn.classList.remove('recording');
+            isRecording = false;
+        }
+    };
+} else {
+    voiceBtn.style.display = 'none';
+}
+</script>
+{% endblock %}

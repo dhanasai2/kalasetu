@@ -1,0 +1,478 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KalaSetu AI Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ks-primary: #e65100;
+            --ks-accent: #ff6d00;
+            --ks-dark: #1a1a2e;
+            --ks-text: #333;
+            --ks-muted: #8e8e93;
+            --ks-light: #f7f7f8;
+            --ks-border: #e5e5ea;
+            --ks-card-bg: #ffffff;
+            --ks-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --ks-serif: 'DM Serif Display', serif;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: var(--ks-font);
+            color: var(--ks-text);
+            background: var(--ks-light);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== Full-Page Layout ===== */
+        .chat-app {
+            display: flex; flex-direction: column;
+            height: 100vh; height: 100dvh;
+        }
+
+        /* ===== Header ===== */
+        .chat-header {
+            display: flex; align-items: center;
+            padding: .75rem 1.25rem;
+            background: linear-gradient(135deg, #d84315, var(--ks-primary));
+            color: #fff; flex-shrink: 0;
+            box-shadow: 0 2px 12px rgba(0,0,0,.15);
+            z-index: 10;
+        }
+        .chat-header-back {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: rgba(255,255,255,.15); border: none; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.15rem; cursor: pointer; margin-right: .75rem;
+            transition: background .2s;
+            text-decoration: none;
+        }
+        .chat-header-back:hover { background: rgba(255,255,255,.25); color: #fff; }
+        .chat-header-avatar {
+            width: 40px; height: 40px; border-radius: 12px;
+            background: rgba(255,255,255,.18); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.15rem; margin-right: .75rem; flex-shrink: 0;
+        }
+        .chat-header-info h1 {
+            font-family: var(--ks-serif); font-size: 1.05rem; margin: 0;
+            color: #fff; font-weight: 400;
+        }
+        .chat-header-info span { font-size: .75rem; opacity: .85; }
+        .chat-header-status {
+            width: 7px; height: 7px; border-radius: 50%; background: #66bb6a;
+            display: inline-block; margin-right: .3rem;
+            box-shadow: 0 0 6px rgba(102,187,106,.7);
+        }
+        .chat-header-actions { margin-left: auto; display: flex; gap: .5rem; }
+        .chat-header-actions button {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: rgba(255,255,255,.12); border: none; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; cursor: pointer; transition: background .2s;
+        }
+        .chat-header-actions button:hover { background: rgba(255,255,255,.25); }
+
+        /* ===== Messages Area ===== */
+        .chat-messages {
+            flex: 1; overflow-y: auto; overflow-x: hidden;
+            padding: 1.25rem 1rem;
+            background: linear-gradient(180deg, #faf8f5, #f2ede7);
+            scroll-behavior: smooth;
+        }
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: #d0c8c0; border-radius: 4px; }
+
+        /* ===== Welcome Card ===== */
+        .chat-welcome {
+            max-width: 520px; margin: 0 auto 1.5rem;
+            text-align: center; padding: 2rem 1.5rem;
+        }
+        .chat-welcome-icon {
+            width: 64px; height: 64px; border-radius: 18px;
+            background: linear-gradient(135deg, var(--ks-primary), var(--ks-accent));
+            display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.6rem; margin-bottom: 1rem;
+            box-shadow: 0 8px 24px rgba(230,81,0,.2);
+        }
+        .chat-welcome h2 {
+            font-family: var(--ks-serif); font-size: 1.4rem; margin-bottom: .4rem;
+            color: var(--ks-dark);
+        }
+        .chat-welcome p { color: var(--ks-muted); font-size: .9rem; line-height: 1.5; }
+
+        /* ===== Quick Actions Grid ===== */
+        .chat-quick-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: .6rem; max-width: 480px; margin: 0 auto 1rem;
+        }
+        .chat-quick-card {
+            display: flex; align-items: center; gap: .6rem;
+            padding: .75rem 1rem; border-radius: 14px;
+            background: var(--ks-card-bg); border: 1.5px solid var(--ks-border);
+            cursor: pointer; transition: all .2s; font-size: .85rem;
+            color: var(--ks-text);
+        }
+        .chat-quick-card:hover {
+            border-color: var(--ks-primary); background: #fff8f3;
+            transform: translateY(-1px); box-shadow: 0 4px 12px rgba(230,81,0,.1);
+        }
+        .chat-quick-card .qc-icon {
+            width: 32px; height: 32px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .95rem; flex-shrink: 0;
+        }
+        .qc-icon.art { background: #fff3e0; color: #e65100; }
+        .qc-icon.gift { background: #fce4ec; color: #c62828; }
+        .qc-icon.decor { background: #e8f5e9; color: #2e7d32; }
+        .qc-icon.market { background: #e3f2fd; color: #1565c0; }
+        .qc-icon.price { background: #f3e5f5; color: #7b1fa2; }
+        .qc-icon.textile { background: #fff8e1; color: #f57f17; }
+
+        /* ===== Message Row ===== */
+        .msg-row {
+            display: flex; gap: .5rem; margin-bottom: 1rem;
+            align-items: flex-end; animation: msg-in .35s cubic-bezier(.4,0,.2,1);
+            max-width: 800px; margin-left: auto; margin-right: auto;
+        }
+        .msg-row.user { flex-direction: row-reverse; }
+        @keyframes msg-in {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: none; }
+        }
+
+        /* Avatar */
+        .msg-av {
+            width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .7rem; flex-shrink: 0;
+        }
+        .msg-av.ai { background: linear-gradient(135deg, var(--ks-primary), var(--ks-accent)); color: #fff; }
+        .msg-av.me { background: var(--ks-dark); color: #fff; }
+
+        /* Bubbles */
+        .msg-bubble {
+            max-width: 70%; padding: .85rem 1.1rem;
+            font-size: .9rem; line-height: 1.65;
+            position: relative; word-wrap: break-word;
+        }
+        .msg-bubble.ai-bubble {
+            background: var(--ks-card-bg);
+            border: 1px solid var(--ks-border);
+            border-radius: 4px 18px 18px 18px;
+            box-shadow: 0 1px 4px rgba(0,0,0,.04);
+        }
+        .msg-bubble.user-bubble {
+            background: linear-gradient(135deg, var(--ks-primary), #d84315);
+            color: #fff;
+            border-radius: 18px 4px 18px 18px;
+            box-shadow: 0 2px 8px rgba(230,81,0,.2);
+        }
+
+        /* Markdown in bubbles */
+        .msg-bubble h1,.msg-bubble h2,.msg-bubble h3,.msg-bubble h4 {
+            font-family: var(--ks-font); font-size: .92rem; font-weight: 700;
+            margin: .5rem 0 .25rem; color: var(--ks-dark);
+        }
+        .user-bubble h1,.user-bubble h2,.user-bubble h3,.user-bubble h4 { color: #fff; }
+        .msg-bubble p { margin: .25rem 0; }
+        .msg-bubble ul, .msg-bubble ol { padding-left: 1.1rem; margin: .25rem 0; }
+        .msg-bubble li { margin-bottom: .15rem; }
+        .msg-bubble strong { color: var(--ks-dark); }
+        .user-bubble strong { color: #fff; }
+        .msg-bubble code {
+            background: rgba(0,0,0,.06); padding: .1rem .35rem;
+            border-radius: 4px; font-size: .84rem;
+        }
+        .msg-bubble a { color: var(--ks-primary); text-decoration: underline; }
+        .user-bubble a { color: #ffe0b2; }
+
+        /* Timestamp */
+        .msg-time {
+            font-size: .68rem; color: var(--ks-muted);
+            margin-top: .3rem; padding: 0 .3rem;
+        }
+        .msg-row.user .msg-time { text-align: right; }
+
+        /* ===== Typing ===== */
+        .typing-row { display: none; }
+        .typing-row.active { display: flex; }
+        .typing-dots {
+            display: flex; gap: 4px; padding: .9rem 1.2rem;
+            background: var(--ks-card-bg); border: 1px solid var(--ks-border);
+            border-radius: 4px 18px 18px 18px;
+        }
+        .typing-dots span {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--ks-primary); opacity: .35;
+            animation: bounce .55s infinite alternate;
+        }
+        .typing-dots span:nth-child(2) { animation-delay: .12s; }
+        .typing-dots span:nth-child(3) { animation-delay: .24s; }
+        @keyframes bounce { to { opacity: 1; transform: translateY(-5px); } }
+
+        /* ===== Input Area ===== */
+        .chat-input-area {
+            flex-shrink: 0; padding: .75rem 1rem;
+            background: var(--ks-card-bg);
+            border-top: 1px solid var(--ks-border);
+            box-shadow: 0 -2px 10px rgba(0,0,0,.04);
+        }
+        .chat-input-row {
+            display: flex; align-items: center; gap: .5rem;
+            max-width: 800px; margin: 0 auto;
+        }
+        .chat-input-row input {
+            flex: 1; border: 1.5px solid var(--ks-border);
+            border-radius: 24px; padding: .75rem 1.2rem;
+            font-family: var(--ks-font); font-size: .9rem;
+            outline: none; transition: all .2s;
+            background: var(--ks-light);
+        }
+        .chat-input-row input:focus {
+            border-color: var(--ks-primary);
+            box-shadow: 0 0 0 3px rgba(230,81,0,.1);
+            background: #fff;
+        }
+        .chat-send-btn {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--ks-primary), var(--ks-accent));
+            border: none; color: #fff; font-size: 1.05rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all .2s; flex-shrink: 0;
+        }
+        .chat-send-btn:hover { transform: scale(1.06); box-shadow: 0 4px 14px rgba(230,81,0,.3); }
+        .chat-send-btn:disabled { opacity: .45; transform: none; cursor: default; }
+        .chat-input-hint {
+            text-align: center; font-size: .72rem; color: var(--ks-muted);
+            margin-top: .4rem;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 600px) {
+            .chat-quick-grid { grid-template-columns: 1fr; }
+            .msg-bubble { max-width: 85%; font-size: .87rem; }
+            .chat-welcome { padding: 1.5rem 1rem; }
+            .chat-welcome h2 { font-size: 1.2rem; }
+            .msg-av { width: 26px; height: 26px; font-size: .6rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-app">
+        <!-- Header -->
+        <div class="chat-header">
+            <a href="{% url 'home' %}" class="chat-header-back" title="Back to home">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div class="chat-header-avatar"><i class="bi bi-stars"></i></div>
+            <div class="chat-header-info">
+                <h1>KalaSetu AI</h1>
+                <span><span class="chat-header-status"></span> Online &middot; Master Craft Advisor</span>
+            </div>
+            <div class="chat-header-actions">
+                <button id="clear-btn" title="New conversation"><i class="bi bi-arrow-clockwise"></i></button>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="chat-messages" id="chat-messages">
+            <!-- Welcome -->
+            <div class="chat-welcome" id="welcome-card">
+                <div class="chat-welcome-icon"><i class="bi bi-stars"></i></div>
+                <h2>Namaste! I'm KalaSetu AI</h2>
+                <p>Your master craft advisor with 50+ years of expertise across India's finest art traditions. Ask me anything!</p>
+            </div>
+
+            <!-- Quick Action Cards -->
+            <div class="chat-quick-grid" id="quick-grid">
+                <div class="chat-quick-card quick-action" data-msg="Tell me about Madhubani painting">
+                    <div class="qc-icon art"><i class="bi bi-palette"></i></div>
+                    <span>Madhubani Painting</span>
+                </div>
+                <div class="chat-quick-card quick-action" data-msg="Gift ideas under ₹2000">
+                    <div class="qc-icon gift"><i class="bi bi-gift"></i></div>
+                    <span>Gift Ideas under ₹2000</span>
+                </div>
+                <div class="chat-quick-card quick-action" data-msg="Handmade home decor suggestions">
+                    <div class="qc-icon decor"><i class="bi bi-house-heart"></i></div>
+                    <span>Home Decor Ideas</span>
+                </div>
+                <div class="chat-quick-card quick-action" data-msg="Help me market my handmade art online">
+                    <div class="qc-icon market"><i class="bi bi-megaphone"></i></div>
+                    <span>Market My Art</span>
+                </div>
+                <div class="chat-quick-card quick-action" data-msg="How should I price my handcrafted products?">
+                    <div class="qc-icon price"><i class="bi bi-currency-rupee"></i></div>
+                    <span>Pricing Strategy</span>
+                </div>
+                <div class="chat-quick-card quick-action" data-msg="Tell me about different Indian textile art forms">
+                    <div class="qc-icon textile"><i class="bi bi-scissors"></i></div>
+                    <span>Indian Textiles</span>
+                </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div class="msg-row typing-row" id="typing">
+                <div class="msg-av ai"><i class="bi bi-stars"></i></div>
+                <div class="typing-dots"><span></span><span></span><span></span></div>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div class="chat-input-area">
+            <form id="chat-form" class="chat-input-row" autocomplete="off">
+                <input type="text" id="chat-input" placeholder="Ask about crafts, gifts, marketing..." autofocus>
+                <button type="submit" class="chat-send-btn" id="send-btn">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </form>
+            <div class="chat-input-hint">Powered by AI &middot; Responses may vary</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+    <script>
+    const sessionId = '{{ session_id }}';
+    const messagesEl = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const typingEl = document.getElementById('typing');
+    const sendBtn = document.getElementById('send-btn');
+    const welcomeCard = document.getElementById('welcome-card');
+    const quickGrid = document.getElementById('quick-grid');
+    const clearBtn = document.getElementById('clear-btn');
+    let messageCount = 0;
+
+    marked.setOptions({ breaks: true, gfm: true });
+
+    function scrollBottom() {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function getTime() {
+        return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function renderMd(text) {
+        try { return marked.parse(text); }
+        catch { return text.replace(/\n/g, '<br>'); }
+    }
+
+    function hideWelcome() {
+        if (welcomeCard) welcomeCard.style.display = 'none';
+        if (quickGrid) quickGrid.style.display = 'none';
+    }
+
+    function addMessage(content, role) {
+        messageCount++;
+        hideWelcome();
+
+        const row = document.createElement('div');
+        row.className = `msg-row ${role === 'user' ? 'user' : ''}`;
+
+        const av = document.createElement('div');
+        av.className = `msg-av ${role === 'user' ? 'me' : 'ai'}`;
+        av.innerHTML = role === 'user' ? '<i class="bi bi-person-fill"></i>' : '<i class="bi bi-stars"></i>';
+
+        const col = document.createElement('div');
+
+        const bubble = document.createElement('div');
+        bubble.className = `msg-bubble ${role === 'user' ? 'user-bubble' : 'ai-bubble'}`;
+        if (role === 'assistant') {
+            bubble.innerHTML = renderMd(content);
+        } else {
+            bubble.textContent = content;
+        }
+
+        const time = document.createElement('div');
+        time.className = 'msg-time';
+        time.textContent = getTime();
+
+        col.appendChild(bubble);
+        col.appendChild(time);
+
+        if (role === 'user') {
+            row.appendChild(col);
+            row.appendChild(av);
+        } else {
+            row.appendChild(av);
+            row.appendChild(col);
+        }
+
+        messagesEl.insertBefore(row, typingEl);
+        scrollBottom();
+    }
+
+    async function sendMessage(message) {
+        message = message.trim();
+        if (!message) return;
+
+        addMessage(message, 'user');
+        chatInput.value = '';
+        chatInput.disabled = true;
+        sendBtn.disabled = true;
+        typingEl.classList.add('active');
+        scrollBottom();
+
+        try {
+            const res = await fetch('/chat/send/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message, session_id: sessionId }),
+            });
+            if (res.status === 403) {
+                window.location.href = '/artisan/login/?next=/chat/';
+                return;
+            }
+            const data = await res.json();
+            typingEl.classList.remove('active');
+            addMessage(data.reply || data.error || 'Something went wrong.', 'assistant');
+        } catch (err) {
+            typingEl.classList.remove('active');
+            addMessage('Sorry, I had trouble connecting. Please try again.', 'assistant');
+        } finally {
+            chatInput.disabled = false;
+            sendBtn.disabled = false;
+            chatInput.focus();
+        }
+    }
+
+    // Form submit
+    chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        sendMessage(chatInput.value);
+    });
+
+    // Quick action cards
+    document.querySelectorAll('.quick-action').forEach(card => {
+        card.addEventListener('click', () => {
+            sendMessage(card.dataset.msg);
+        });
+    });
+
+    // Clear / new conversation
+    clearBtn.addEventListener('click', () => {
+        // Remove all message rows
+        messagesEl.querySelectorAll('.msg-row:not(.typing-row)').forEach(el => el.remove());
+        messageCount = 0;
+        if (welcomeCard) welcomeCard.style.display = '';
+        if (quickGrid) quickGrid.style.display = '';
+        chatInput.focus();
+    });
+
+    // Enter to send
+    chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            chatForm.dispatchEvent(new Event('submit'));
+        }
+    });
+    </script>
+</body>
+</html>

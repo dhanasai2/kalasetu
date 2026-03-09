@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Page Not Found{% endblock %}
+
+{% block content %}
+<div class="ks-auth-page">
+    <div class="container text-center">
+        <div style="font-size:6rem;color:var(--ks-saffron);font-family:'DM Serif Display',serif;line-height:1;">404</div>
+        <h2 class="mb-3">Page Not Found</h2>
+        <p class="text-muted mb-4" style="max-width:400px;margin:0 auto;">The page you're looking for doesn't exist or has been moved. Let's get you back on track.</p>
+        <div class="d-flex gap-3 justify-content-center">
+            <a href="{% url 'home' %}" class="btn ks-btn-primary"><i class="bi bi-house me-1"></i> Home</a>
+            <a href="{% url 'storefront' %}" class="btn ks-btn-outline"><i class="bi bi-shop me-1"></i> Browse Crafts</a>
+            <a href="{% url 'chat_page' %}" class="btn ks-btn-outline"><i class="bi bi-chat-dots me-1"></i> AI Assistant</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

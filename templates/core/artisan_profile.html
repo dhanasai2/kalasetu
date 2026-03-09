@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ artisan.name }} — Artisan Profile{% endblock %}
+
+{% block content %}
+<section class="ks-section">
+    <div class="container">
+        <!-- Profile Header -->
+        <div class="ks-profile-header">
+            <div class="row align-items-center">
+                <div class="col-md-2 text-center mb-3 mb-md-0">
+                    {% if artisan.photo %}
+                    <img src="{{ artisan.photo.url }}" class="ks-profile-avatar" alt="{{ artisan.name }}">
+                    {% else %}
+                    <div class="ks-profile-placeholder mx-auto">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-10">
+                    <h2>{{ artisan.name }}</h2>
+                    <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+                        <span class="ks-badge ks-badge-craft">{{ artisan.craft_type }}</span>
+                        <span class="text-muted" style="font-size:.88rem;"><i class="bi bi-geo-alt"></i> {{ artisan.location }}{% if artisan.state %}, {{ artisan.state }}{% endif %}</span>
+                    </div>
+                    {% if artisan.bio %}
+                    <p style="color:var(--ks-muted);font-size:1.02rem;line-height:1.7;margin-top:.8rem;">{{ artisan.bio }}</p>
+                    {% endif %}
+                    {% if artisan.story %}
+                    <div class="ks-quote-box">
+                        <h6 style="font-size:.85rem;font-weight:700;margin-bottom:.4rem;"><i class="bi bi-chat-quote me-1"></i> In Their Own Words</h6>
+                        <p style="margin:0;font-style:italic;color:var(--ks-text);line-height:1.6;">"{{ artisan.story }}"</p>
+                    </div>
+                    {% endif %}
+                    {% if gi_tags %}
+                    <div class="mt-2">
+                        {% for tag in gi_tags %}
+                        <span class="ks-gi-badge"><i class="bi bi-patch-check-fill me-1"></i>{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Products -->
+        <div class="ks-section-header" style="margin-bottom:2rem;">
+            <span class="ks-label">Collection</span>
+            <h3 class="ks-section-title" style="font-size:1.6rem;">Crafts by {{ artisan.name }}</h3>
+        </div>
+
+        {% if products %}
+        <div class="row g-4">
+            {% for product in products %}
+            <div class="col-md-3 col-6">
+                <a href="{% url 'product_detail' product.id %}" class="text-decoration-none">
+                    <div class="ks-product-card">
+                        <div class="ks-product-img">
+                            <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                            <span class="ks-product-badge">{{ product.art_form }}</span>
+                        </div>
+                        <div class="ks-product-info">
+                            <h6>{{ product.title }}</h6>
+                            {% if product.price %}
+                            <span class="ks-product-price">₹{{ product.price }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="ks-empty-state">
+            <i class="bi bi-palette"></i>
+            <h5>No products published yet</h5>
+            <p>This artisan hasn't published any products yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
