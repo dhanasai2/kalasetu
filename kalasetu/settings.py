@@ -27,7 +27,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-me-in-produc
 
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 # AI API Key
 GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
@@ -121,8 +121,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files (uploads)
 MEDIA_URL = '/media/'
